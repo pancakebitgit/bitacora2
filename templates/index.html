@@ -7,10 +7,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Bitácora de Estrategias de Opciones</h1>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <h2>Vencimientos</h2>
+            <nav id="expiration-nav">
+                <!-- Las fechas de vencimiento se cargarán aquí -->
+                <p>Cargando...</p>
+            </nav>
+        </aside>
 
-        <form id="strategyForm">
+        <main class="main-content">
+            <div class="form-container">
+                <h1>Bitácora de Estrategias de Opciones</h1>
+                <form id="strategyForm">
+                    <!-- ... (contenido del formulario existente sin cambios) ... -->
             <h2>Información General de la Operación</h2>
             <div>
                 <label for="ticker">Activo Subyacente (Ticker):</label>
@@ -78,8 +88,9 @@
             <!-- Las estrategias guardadas se cargarán aquí -->
             <p>Aún no hay estrategias guardadas.</p>
         </div>
-
-    </div>
+    </div> <!-- Cierre de .form-container -->
+    </main> <!-- Cierre de .main-content -->
+    </div> <!-- Cierre de .app-container -->
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

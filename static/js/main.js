@@ -12,14 +12,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const legsContainer = document.getElementById('legsContainer');
     const addLegBtn = document.getElementById('addLegBtn');
-    let legCounter = 1;
+    let legCounter = 1; // Starts at 1 because we have one leg (index 0) in HTML
 
     function updateLegNumbers() {
         const legRows = legsContainer.querySelectorAll('.leg-row');
         legRows.forEach((legRow, index) => {
             legRow.querySelector('h3').textContent = `Leg ${index + 1}`;
             const removeBtn = legRow.querySelector('.remove-leg-btn');
-            if (removeBtn) { // Ensure button exists
+            if (removeBtn) {
                  removeBtn.style.display = legRows.length > 1 ? 'inline-block' : 'none';
             }
         });
@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newLegRow = document.createElement('div');
         newLegRow.classList.add('leg-row');
         newLegRow.id = `leg-${legCounter}`;
+        // Note: Name attributes use legCounter for uniqueness before form submission
         newLegRow.innerHTML = `
             <h3>Leg ${legCounter + 1}</h3>
             <div>
@@ -122,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert(`Por favor seleccione una Acción (Compra/Venta) para el Leg ${index + 1}.`);
                     allLegsValid = false;
                 }
-                if (allLegsValid && !optionTypeInput.value) { // Check only if previous was valid
+                if (allLegsValid && !optionTypeInput.value) {
                     alert(`Por favor seleccione un Tipo (Call/Put) para el Leg ${index + 1}.`);
                     allLegsValid = false;
                 }
@@ -143,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(data.message || 'Estrategia procesada.');
                 if (data.success) {
                     strategyForm.reset();
-                    // Reset entry date
                     const now = new Date();
                     const year = now.getFullYear();
                     const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -152,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const minutes = now.getMinutes().toString().padStart(2, '0');
                     if(entryDateField) entryDateField.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-                    // Clear selected buttons in the first leg
                     const firstLegRow = document.getElementById('leg-0');
                     if (firstLegRow) {
                         firstLegRow.querySelectorAll('.action-btn.selected, .option-type-btn.selected').forEach(btn => {
@@ -163,13 +162,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         const firstOptionTypeInput = firstLegRow.querySelector('.leg-option-type-input');
                         if(firstOptionTypeInput) firstOptionTypeInput.value = '';
                     }
-                    // Remove extra legs, leaving only the first one
                     const legRowsToRemove = legsContainer.querySelectorAll('.leg-row:not(#leg-0)');
                     legRowsToRemove.forEach(row => row.remove());
-                    legCounter = 1; // Reset counter
-                    updateLegNumbers(); // Update numbering and remove button visibility
+                    legCounter = 1;
+                    updateLegNumbers();
 
-                    fetchAndDisplayStrategies(); // Refresh the list of strategies
+                    fetchAndDisplayStrategies();
                 }
             })
             .catch((error) => {
@@ -181,19 +179,76 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Displaying Saved Strategies ---
     const savedStrategiesContainer = document.getElementById('savedStrategiesContainer');
+    const expirationNav = document.getElementById('expiration-nav');
+    let allFetchedStrategies = []; // Store all strategies to allow client-side filtering
 
-    function renderStrategies(strategies) {
+    function populateExpirationNav(strategies) {
+        if (!expirationNav) return;
+        expirationNav.innerHTML = ''; // Clear current nav
+
+        const expirationDates = strategies
+            .map(s => s.primary_expiration_date_str ? s.primary_expiration_date_str.substring(0, 7) : 'Sin Vencimiento')
+            .filter((value, index, self) => self.indexOf(value) === index); // Unique dates/tags
+
+        expirationDates.sort((a, b) => {
+            if (a === 'Sin Vencimiento') return 1;
+            if (b === 'Sin Vencimiento') return -1;
+            return new Date(a + '-01') - new Date(b + '-01');
+        });
+
+        const allLink = document.createElement('a');
+        allLink.href = '#';
+        allLink.textContent = 'Mostrar Todas';
+        allLink.classList.add('expiration-link', 'active'); // Active by default
+        allLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.expiration-link.active').forEach(el => el.classList.remove('active'));
+            allLink.classList.add('active');
+            renderStrategies(allFetchedStrategies); // Render all
+        });
+        expirationNav.appendChild(allLink);
+
+        expirationDates.forEach(dateStr => {
+            const link = document.createElement('a');
+            link.href = '#';
+            link.classList.add('expiration-link');
+            if (dateStr === 'Sin Vencimiento') {
+                link.textContent = 'Sin Vencimiento';
+            } else {
+                try {
+                    link.textContent = new Date(dateStr + '-01').toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
+                } catch (e) { link.textContent = dateStr; }
+            }
+            link.dataset.filterDate = dateStr;
+
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.expiration-link.active').forEach(el => el.classList.remove('active'));
+                link.classList.add('active');
+                const filtered = allFetchedStrategies.filter(s => {
+                    const strategyExp = s.primary_expiration_date_str ? s.primary_expiration_date_str.substring(0, 7) : 'Sin Vencimiento';
+                    return strategyExp === dateStr;
+                });
+                renderStrategies(filtered, dateStr); // Pass the filter date to render for context if needed
+            });
+            expirationNav.appendChild(link);
+        });
+    }
+
+    // Modified renderStrategies to accept an optional filter (though grouping is now primary)
+    function renderStrategies(strategiesToRender, currentFilterDate = null) {
         savedStrategiesContainer.innerHTML = '';
 
-        if (!strategies || strategies.length === 0) {
-            savedStrategiesContainer.innerHTML = '<p>Aún no hay estrategias guardadas.</p>';
+        if (!strategiesToRender || strategiesToRender.length === 0) {
+            savedStrategiesContainer.innerHTML = '<p>No hay estrategias para mostrar' + (currentFilterDate ? ` para ${currentFilterDate}.` : '.') + '</p>';
             return;
         }
 
-        const strategiesByMonth = strategies.reduce((acc, strategy) => {
-            let monthYear = 'Sin Vencimiento Asignado'; // Default if no primary_expiration_date_str
+        // Grouping by month is still useful even if pre-filtered, to maintain structure
+        const strategiesByMonth = strategiesToRender.reduce((acc, strategy) => {
+            let monthYear = 'Sin Vencimiento Asignado';
             if (strategy.primary_expiration_date_str) {
-                monthYear = strategy.primary_expiration_date_str.substring(0, 7); // YYYY-MM
+                monthYear = strategy.primary_expiration_date_str.substring(0, 7);
             }
             if (!acc[monthYear]) {
                 acc[monthYear] = [];
@@ -205,12 +260,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortedMonths = Object.keys(strategiesByMonth).sort((a, b) => {
             if (a === 'Sin Vencimiento Asignado') return 1;
             if (b === 'Sin Vencimiento Asignado') return -1;
-            try { // Handle potential invalid date strings for sorting
-                return new Date(a + '-01') - new Date(b + '-01');
-            } catch (e) { return 0; }
+            try { return new Date(a + '-01') - new Date(b + '-01'); }
+            catch (e) { return 0; }
         });
 
         sortedMonths.forEach(monthYear => {
+            // If a filter is active, only show the group for that filter
+            if (currentFilterDate && currentFilterDate !== 'Sin Vencimiento' && monthYear !== currentFilterDate && currentFilterDate !== 'Mostrar Todas') { // 'Mostrar Todas' is not a date
+                 // If currentFilterDate is not null, it means we are filtering.
+                 // The strategiesToRender are already filtered, so this check is redundant if filtering happens before calling render.
+                 // However, if renderStrategies is called with all strategies and a filter, this is needed.
+                 // The current logic: populateExpirationNav filters `allFetchedStrategies` THEN calls render. So this check is not strictly needed.
+            }
+
             const monthDiv = document.createElement('div');
             monthDiv.classList.add('expiration-month-group');
 
@@ -271,13 +333,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     detailsBtn.addEventListener('click', function() {
                         const detailsDiv = card.querySelector('.strategy-details');
                         if (detailsDiv) {
-                            detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
-                            this.textContent = detailsDiv.style.display === 'none' ? 'Ver Detalles' : 'Ocultar Detalles';
+                            detailsDiv.classList.toggle('expanded');
+                            // Adjust padding/margin if they were part of the transition from 0
+                            if (detailsDiv.classList.contains('expanded')) {
+                                // These are set by default, but if they were 0 when collapsed:
+                                // detailsDiv.style.paddingTop = '15px';
+                                // detailsDiv.style.marginTop = '15px';
+                                this.textContent = 'Ocultar Detalles';
+                            } else {
+                                // If collapsing and padding/margin were part of transition:
+                                // detailsDiv.style.paddingTop = '0';
+                                // detailsDiv.style.marginTop = '0';
+                                this.textContent = 'Ver Detalles';
+                            }
                         }
                     });
                 }
             });
-            savedStrategiesContainer.appendChild(monthDiv);
+            if (strategiesByMonth[monthYear].length > 0) { // Only append monthDiv if it has strategies
+                 savedStrategiesContainer.appendChild(monthDiv);
+            }
         });
     }
 
@@ -286,7 +361,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    renderStrategies(data.strategies);
+                    allFetchedStrategies = data.strategies; // Store all strategies
+                    populateExpirationNav(allFetchedStrategies);
+                    renderStrategies(allFetchedStrategies); // Initial render of all strategies
                 } else {
                     if(savedStrategiesContainer) savedStrategiesContainer.innerHTML = `<p>Error al cargar estrategias: ${data.message}</p>`;
                     console.error('Error fetching strategies:', data.message);

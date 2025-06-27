@@ -9,7 +9,12 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
 - **Cálculo de Riesgo/Beneficio:** Estimación inicial de Máximo Riesgo y Máximo Beneficio para las estrategias reconocidas.
 - **Almacenamiento de Datos:** Guarda las operaciones, incluyendo detalles de cada leg y notas del usuario.
 - **Carga de Imágenes:** Permite adjuntar imágenes (gráficos, perfiles de riesgo) a cada operación.
-- **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con detalles expandibles.
+- **Visualización Mejorada:**
+    - **Tema Oscuro Moderno:** Interfaz con un diseño profesional oscuro, con efectos de relieve.
+    - **Panel Lateral de Navegación:** Permite filtrar estrategias por mes de vencimiento.
+    - **Vista Detallada Interactiva:** Detalles de estrategias expandibles con transiciones suaves.
+    - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento.
+
 
 ## Tecnologías Utilizadas
 
