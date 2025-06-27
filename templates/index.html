@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitácora de Estrategias de Opciones</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Bitácora de Estrategias de Opciones</h1>
+
+        <form id="strategyForm">
+            <h2>Información General de la Operación</h2>
+            <div>
+                <label for="ticker">Activo Subyacente (Ticker):</label>
+                <input type="text" id="ticker" name="ticker" required>
+            </div>
+            <div>
+                <label for="entryDate">Fecha de Entrada:</label>
+                <input type="text" id="entryDate" name="entryDate" readonly>
+            </div>
+            <div>
+                <label for="marketVision">Visión del Mercado / Justificación:</label>
+                <textarea id="marketVision" name="marketVision" rows="4"></textarea>
+            </div>
+
+            <h2>Constructor de Legs</h2>
+            <div id="legsContainer">
+                <!-- Leg 0: Initial leg row -->
+                <div class="leg-row" id="leg-0">
+                    <h3>Leg 1</h3>
+                    <div>
+                        <label>Acción:</label>
+                        <button type="button" class="action-btn buy" data-action="BUY">COMPRA (Buy to Open)</button>
+                        <button type="button" class="action-btn sell" data-action="SELL">VENTA (Sell to Open)</button>
+                        <input type="hidden" name="legs[0][action]" class="leg-action-input" required>
+                    </div>
+                    <div>
+                        <label for="legs[0][quantity]">Cantidad:</label>
+                        <input type="number" name="legs[0][quantity]" min="1" value="1" required>
+                    </div>
+                    <div>
+                        <label>Tipo:</label>
+                        <button type="button" class="option-type-btn call" data-type="CALL">CALL</button>
+                        <button type="button" class="option-type-btn put" data-type="PUT">PUT</button>
+                        <input type="hidden" name="legs[0][option_type]" class="leg-option-type-input" required>
+                    </div>
+                    <div>
+                        <label for="legs[0][expirationDate]">Fecha de Vencimiento:</label>
+                        <input type="date" name="legs[0][expirationDate]" required>
+                    </div>
+                    <div>
+                        <label for="legs[0][strike]">Strike:</label>
+                        <input type="number" step="any" name="legs[0][strike]" required>
+                    </div>
+                    <div>
+                        <label for="legs[0][premium]">Prima (por contrato):</label>
+                        <input type="number" step="any" name="legs[0][premium]" required>
+                    </div>
+                    <button type="button" class="remove-leg-btn" style="display:none;">Eliminar Leg</button>
+                </div>
+            </div>
+            <button type="button" id="addLegBtn">+ Añadir Leg</button>
+
+            <h2>Sección Final</h2>
+            <div>
+                <label for="images">Carga de Imágenes (opcional):</label>
+                <input type="file" id="images" name="images[]" multiple accept="image/*">
+            </div>
+
+            <button type="submit" id="saveStrategyBtn">Guardar Estrategia</button>
+        </form>
+
+        <hr>
+        <h2>Estrategias Guardadas</h2>
+        <div id="savedStrategiesContainer">
+            <!-- Las estrategias guardadas se cargarán aquí -->
+            <p>Aún no hay estrategias guardadas.</p>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
