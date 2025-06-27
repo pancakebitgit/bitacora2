@@ -1,0 +1,195 @@
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Important for full width */
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+button[type="submit"], #addLegBtn {
+    background-color: #5cb85c;
+    color: white;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover, #addLegBtn:hover {
+    background-color: #4cae4c;
+}
+
+.leg-row {
+    border: 1px solid #e7e7e7;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.leg-row h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.action-btn, .option-type-btn {
+    margin-right: 10px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.action-btn.selected, .option-type-btn.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+.remove-leg-btn {
+    background-color: #d9534f;
+    color: white;
+    margin-top: 10px;
+    float: right;
+}
+
+.remove-leg-btn:hover {
+    background-color: #c9302c;
+}
+
+/* Clearfix for floated remove button if needed */
+.leg-row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+#savedStrategiesContainer {
+    margin-top: 20px;
+}
+
+/* Basic card styling for saved strategies - can be improved */
+.strategy-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.strategy-card h3, .strategy-card h4, .strategy-card h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.expiration-month-group {
+    margin-bottom: 30px;
+    padding: 10px;
+    border: 1px solid #d3d3d3;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.expiration-month-group h3 {
+    background-color: #e9ecef;
+    padding: 10px;
+    margin: -10px -10px 10px -10px; /* Extend to fill padding of parent */
+    border-radius: 5px 5px 0 0;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+.strategy-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.legs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.legs-table th, .legs-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.legs-table th {
+    background-color: #f2f2f2;
+}
+
+.strategy-images img {
+    border: 1px solid #ddd;
+    padding: 2px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    max-width: 100px; /* Ensure images are not too large */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.view-details-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+.view-details-btn:hover {
+    background-color: #0056b3;
+}
