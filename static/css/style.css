@@ -1,195 +1,364 @@
+/* --- Global Resets & Dark Theme Base --- */
 body {
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern sans-serif */
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
-    color: #333;
+    padding: 0;
+    background-color: #1e1e1e; /* Dark background */
+    color: #e0e0e0; /* Light text */
+    font-size: 16px;
 }
 
-.container {
-    max-width: 800px;
-    margin: auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+* {
+    box-sizing: border-box;
 }
 
-h1, h2, h3 {
-    color: #333;
+/* --- App Layout --- */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px; /* Slightly wider sidebar */
+    background-color: #252526; /* Sidebar dark background */
+    padding: 25px;
+    border-right: 1px solid #333; /* Darker border */
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3); /* Subtle shadow for depth */
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    color: #00aeff; /* Accent color for heading */
+    border-bottom: 1px solid #444;
+    padding-bottom: 12px;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+#expiration-nav {
+    margin-top: 20px;
+}
+
+#expiration-nav a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #c0c0c0; /* Lighter text for nav links */
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border: 1px solid transparent; /* For border transition if needed */
+}
+
+#expiration-nav a:hover {
+    background-color: #3a3a3d; /* Hover background */
+    color: #ffffff;
+}
+
+#expiration-nav a.active {
+    background-color: #007acc; /* Accent color for active link */
+    color: #ffffff;
+    font-weight: bold;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3); /* Inner and outer shadow for active state */
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    margin-left: 280px; /* Match sidebar width */
+    overflow-y: auto; /* Ensure main content can scroll if it overflows */
+    height: 100vh; /* Allow independent scrolling if content is taller than viewport */
+}
+
+.form-container {
+    max-width: 950px;
+    margin: 0 auto 30px auto; /* Center form, add bottom margin */
+    background: #2d2d30; /* Darker background for form area */
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Pronounced shadow for relief */
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5 {
+    color: #e0e0e0; /* Light text for headings */
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    font-size: 2em;
+    color: #00aeff; /* Accent color */
 }
 
-h2 {
-    border-bottom: 1px solid #eee;
+h2 { /* General section titles */
+    border-bottom: 1px solid #444;
     padding-bottom: 10px;
     margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 1.6em;
+}
+
+h3 { /* Leg group titles, Expiration group titles */
+    font-size: 1.3em;
+    color: #cccccc;
+    margin-bottom: 15px;
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    margin-bottom: 8px;
+    font-weight: 500; /* Slightly less bold */
+    color: #b0b0b0; /* Lighter label text */
 }
 
+/* --- Form Elements Styling (Dark Theme & Relief) --- */
 input[type="text"],
 input[type="number"],
 input[type="date"],
 input[type="file"],
 textarea {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box; /* Important for full width */
+    padding: 12px 15px;
+    margin-bottom: 18px;
+    border: 1px solid #444; /* Darker border */
+    border-radius: 6px;
+    background-color: #36363a; /* Dark input background */
+    color: #e0e0e0; /* Light text in inputs */
+    font-size: 1em;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.05); /* Inner shadow for depth */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="date"]::-webkit-calendar-picker-indicator { /* Style date picker icon for dark theme */
+    filter: invert(0.8);
+}
+
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus {
+    border-color: #007acc; /* Accent border on focus */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 3px rgba(0, 122, 204, 0.3); /* Focus ring */
+    outline: none;
 }
 
 textarea {
     resize: vertical;
+    min-height: 80px;
 }
 
-button {
-    padding: 10px 15px;
+/* Buttons: General, Submit, Add Leg */
+button, input[type="submit"] { /* General button styling */
+    padding: 12px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1); /* Relief effect */
+}
+button:active, input[type="submit"]:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,0,0,0.1);
 }
 
 button[type="submit"], #addLegBtn {
-    background-color: #5cb85c;
+    background-color: #007acc; /* Primary action color */
     color: white;
     margin-top: 10px;
 }
-
 button[type="submit"]:hover, #addLegBtn:hover {
-    background-color: #4cae4c;
+    background-color: #005c99; /* Darker shade on hover */
 }
 
+/* Leg Row Styling */
 .leg-row {
-    border: 1px solid #e7e7e7;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    border: 1px solid #444;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #333336; /* Slightly different dark for leg rows */
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
 }
-
 .leg-row h3 {
     margin-top: 0;
     font-size: 1.2em;
-    color: #555;
+    color: #00aeff; /* Accent for leg number */
+    border-bottom: 1px dashed #555;
+    padding-bottom: 8px;
 }
 
+/* Custom Action & Option Type Buttons (Buy/Sell, Call/Put) */
 .action-btn, .option-type-btn {
     margin-right: 10px;
-    background-color: #f0f0f0;
-    color: #333;
-    border: 1px solid #ccc;
+    margin-bottom: 10px; /* Space for multiple buttons */
+    background-color: #4a4a4e; /* Default button dark bg */
+    color: #c0c0c0;
+    border: 1px solid #555;
+    padding: 10px 15px;
 }
-
+.action-btn:hover, .option-type-btn:hover {
+    background-color: #5a5a5e;
+    border-color: #666;
+}
 .action-btn.selected, .option-type-btn.selected {
-    background-color: #007bff;
     color: white;
-    border-color: #0056b3;
+    border-width: 1px; /* Keep consistent border */
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5); /* "Pressed" effect */
 }
+.action-btn.buy.selected { background-color: #28a745; border-color: #1e7e34;} /* Green for Buy */
+.action-btn.sell.selected { background-color: #dc3545; border-color: #b02a37;} /* Red for Sell */
+.option-type-btn.call.selected { background-color: #007bff; border-color: #0056b3;} /* Blue for Call */
+.option-type-btn.put.selected { background-color: #ffc107; color: #333; border-color: #d39e00;} /* Yellow for Put */
+
 
 .remove-leg-btn {
-    background-color: #d9534f;
+    background-color: #6c757d; /* Secondary/delete color */
     color: white;
     margin-top: 10px;
     float: right;
 }
-
 .remove-leg-btn:hover {
-    background-color: #c9302c;
+    background-color: #545b62;
 }
 
-/* Clearfix for floated remove button if needed */
-.leg-row::after {
-    content: "";
-    clear: both;
-    display: table;
-}
-
+/* --- Saved Strategies Display --- */
 #savedStrategiesContainer {
-    margin-top: 20px;
-}
-
-/* Basic card styling for saved strategies - can be improved */
-.strategy-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-}
-
-.strategy-card h3, .strategy-card h4, .strategy-card h5 {
-    margin-top: 0;
-    margin-bottom: 10px;
+    margin-top: 30px;
 }
 
 .expiration-month-group {
     margin-bottom: 30px;
-    padding: 10px;
-    border: 1px solid #d3d3d3;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    padding: 15px;
+    background-color: #2c2f33; /* Card-like bg for month group */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.expiration-month-group h3 { /* Month headers */
+    background-color: transparent; /* Remove previous bg */
+    color: #00aeff; /* Accent color */
+    padding: 0 0 10px 0;
+    margin: 0 0 15px 0;
+    border-bottom: 1px solid #444;
+    font-size: 1.4em;
 }
 
-.expiration-month-group h3 {
-    background-color: #e9ecef;
-    padding: 10px;
-    margin: -10px -10px 10px -10px; /* Extend to fill padding of parent */
-    border-radius: 5px 5px 0 0;
-    border-bottom: 1px solid #d3d3d3;
+.strategy-card {
+    background: #36393f; /* Individual strategy card bg */
+    border: 1px solid #4a4a4e;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.strategy-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
+
+.strategy-card h4 { /* Ticker - Strategy Name */
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #00aeff; /* Accent */
+    font-size: 1.25em;
+}
+.strategy-card p {
+    margin-bottom: 8px;
+    color: #b0b0b0; /* Lighter text for details */
+    font-size: 0.95em;
+}
+.strategy-card p strong {
+    color: #d0d0d0; /* Slightly brighter for strong tags */
+}
+
+.view-details-btn {
+    background-color: #4a4a4e; /* Consistent with other secondary buttons */
+    color: #e0e0e0;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    margin-top: 10px;
+    border: 1px solid #555;
+}
+.view-details-btn:hover {
+    background-color: #5a5a5e;
 }
 
 .strategy-details {
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #4a4a4e; /* Darker border */
+    overflow: hidden; /* Important for max-height transition */
+    max-height: 0; /* Initially collapsed */
+    transition: max-height 0.5s ease-out, padding-top 0.5s ease-out, margin-top 0.5s ease-out; /* Smooth transition */
+}
+.strategy-details.expanded {
+    max-height: 1500px; /* Large enough to fit content; adjust as needed */
+    /* padding-top: 15px; /* Already there, transition will apply if it changes from 0 */
+    /* margin-top: 15px; /* Already there */
+}
+.strategy-details h5 {
+    color: #c0c0c0;
+    margin-bottom: 8px;
+    font-size: 1.1em;
 }
 
 .legs-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 15px;
+    font-size: 0.9em;
 }
-
 .legs-table th, .legs-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid #4a4a4e; /* Darker table borders */
+    padding: 10px;
     text-align: left;
 }
-
 .legs-table th {
-    background-color: #f2f2f2;
+    background-color: #3a3a3d; /* Header row bg */
+    color: #e0e0e0;
+    font-weight: 600;
+}
+.legs-table td {
+    color: #b0b0b0;
 }
 
 .strategy-images img {
-    border: 1px solid #ddd;
-    padding: 2px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    border-radius: 3px;
-    max-width: 100px; /* Ensure images are not too large */
-    height: auto; /* Maintain aspect ratio */
+    border: 1px solid #555;
+    padding: 3px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    max-width: 120px;
+    height: auto;
+    background-color: #4a4a4e; /* Background for image container if needed */
+    transition: transform 0.2s ease;
+}
+.strategy-images img:hover {
+    transform: scale(1.05);
 }
 
-.view-details-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 5px 10px;
-    font-size: 0.9em;
-    margin-top: 5px;
+/* Scrollbar Styling (Webkit browsers) - Optional */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
 }
-.view-details-btn:hover {
-    background-color: #0056b3;
+::-webkit-scrollbar-track {
+    background: #252526; /* Sidebar-like bg for track */
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
 }
