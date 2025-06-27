@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitácora de Estrategias de Opciones</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -92,6 +94,27 @@
     </main> <!-- Cierre de .main-content -->
     </div> <!-- Cierre de .app-container -->
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Pop-up Modal Structure -->
+    <div id="popupModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class.bind="close-btn" id="closePopupBtn">&times;</span>
+            <div id="popupIcon" class="popup-icon">
+                <!-- Icon will be set by JS, e.g., a checkmark or an X -->
+            </div>
+            <h3 id="popupTitle"></h3>
+            <p id="popupMessage"></p>
+            <div class="popup-sparkles">
+                <!-- Sparkles will be animated with CSS -->
+                <div class="sparkle s1"></div>
+                <div class="sparkle s2"></div>
+                <div class="sparkle s3"></div>
+                <div class="sparkle s4"></div>
+                <div class="sparkle s5"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

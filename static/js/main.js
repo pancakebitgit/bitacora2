@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const addLegBtn = document.getElementById('addLegBtn');
     let legCounter = 1; // Starts at 1 because we have one leg (index 0) in HTML
 
+    function initializeDatepicker(element) {
+        if(element) {
+            flatpickr(element, {
+                dateFormat: "Y-m-d", // ISO format, matches input type="date" value
+                altInput: true, // Show a user-friendly format but submit standard
+                altFormat: "d M, Y", // Example: 23 Mar, 2024
+                // Possible future: locale: "es" (requires importing locale file)
+            });
+        }
+    }
+
     function updateLegNumbers() {
         const legRows = legsContainer.querySelectorAll('.leg-row');
         legRows.forEach((legRow, index) => {
@@ -86,6 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         legsContainer.appendChild(newLegRow);
         setupButtonToggle(newLegRow);
+        const dateInput = newLegRow.querySelector('input[type="date"]');
+        if (dateInput) initializeDatepicker(dateInput);
 
         const removeBtn = newLegRow.querySelector('.remove-leg-btn');
         if (removeBtn) {
@@ -106,6 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialLeg = document.getElementById('leg-0');
     if (initialLeg) {
         setupButtonToggle(initialLeg);
+        const initialDateInput = initialLeg.querySelector('input[type="date"]');
+        if (initialDateInput) initializeDatepicker(initialDateInput);
     }
     updateLegNumbers();
 
@@ -299,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p><strong>Riesgo Máx:</strong> ${maxRiskDisplay}</p>
                     <p><strong>Beneficio Máx:</strong> ${maxProfitDisplay}</p>
                     <button class="view-details-btn">Ver Detalles</button>
-                    <div class="strategy-details" style="display:none;">
+                    <div class="strategy-details"> {/* REMOVED style="display:none;" */}
                         <h5>Detalle de Legs:</h5>
                         <table class="legs-table">
                             <thead>
@@ -376,4 +391,137 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     fetchAndDisplayStrategies(); // Initial load
+
+    // --- Pop-up Modal Logic ---
+    const popupModal = document.getElementById('popupModal');
+    const closePopupBtn = document.getElementById('closePopupBtn');
+    const popupIconEl = document.getElementById('popupIcon');
+    const popupTitleEl = document.getElementById('popupTitle');
+    const popupMessageEl = document.getElementById('popupMessage');
+
+    function showPopup(title, message, type = 'success') {
+        if (!popupModal || !popupTitleEl || !popupMessageEl || !popupIconEl) return;
+
+        popupTitleEl.textContent = title;
+        popupMessageEl.textContent = message;
+
+        popupIconEl.innerHTML = ''; // Clear previous icon
+        popupIconEl.className = 'popup-icon'; // Reset classes
+
+        if (type === 'success') {
+            popupIconEl.classList.add('success');
+            popupIconEl.innerHTML = '&#10004;'; // Checkmark
+        } else if (type === 'error') {
+            popupIconEl.classList.add('error');
+            popupIconEl.innerHTML = '&#10008;'; // X mark or similar
+        }
+        // Could add more types like 'warning', 'info'
+
+        popupModal.style.display = 'flex'; // Use flex to center, then trigger transition
+        setTimeout(() => { // Timeout to allow display:flex to apply before opacity transition
+            popupModal.classList.add('visible');
+        }, 20);
+    }
+
+    function hidePopup() {
+        if (!popupModal) return;
+        popupModal.classList.remove('visible');
+        // The CSS transition will handle hiding it after opacity animation (visibility: hidden)
+        // If issues, can use: setTimeout(() => { popupModal.style.display = 'none'; }, 300); // Match transition duration
+    }
+
+    if (closePopupBtn) {
+        closePopupBtn.addEventListener('click', hidePopup);
+    }
+    if (popupModal) { // Close on overlay click
+        popupModal.addEventListener('click', function(event) {
+            if (event.target === popupModal) {
+                hidePopup();
+            }
+        });
+    }
+
+    // Update form submission to use the new popup
+    if (strategyForm) {
+        // The previous event listener for submit is being overwritten here by re-defining it.
+        // This is simpler than trying to find and modify the old one.
+        strategyForm.onsubmit = function(event) { // Changed to onsubmit for simpler replacement
+            event.preventDefault();
+
+            let firstValidationError = null;
+            const legRows = legsContainer.querySelectorAll('.leg-row');
+            for (let i = 0; i < legRows.length; i++) { // Use a for loop to allow early exit
+                const legRow = legRows[i];
+                const index = i; // Or get index from an attribute if preferred
+                const actionInput = legRow.querySelector('.leg-action-input');
+                const optionTypeInput = legRow.querySelector('.leg-option-type-input');
+
+                if (!actionInput.value) {
+                    firstValidationError = `Por favor seleccione una Acción (Compra/Venta) para el Leg ${index + 1}.`;
+                    break;
+                }
+                if (!optionTypeInput.value) {
+                    firstValidationError = `Por favor seleccione un Tipo (Call/Put) para el Leg ${index + 1}.`;
+                    break;
+                }
+            }
+
+            if (firstValidationError) {
+                showPopup('Error de Validación', firstValidationError, 'error');
+                return;
+            }
+
+            const formData = new FormData(strategyForm);
+            fetch('/api/save_strategy', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Save Strategy Response:', data);
+                if (data.success) {
+                    showPopup('¡Éxito!', data.message || 'Estrategia guardada correctamente.', 'success');
+                    strategyForm.reset();
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                    const day = now.getDate().toString().padStart(2, '0');
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    if(entryDateField) entryDateField.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+                    const firstLegRow = document.getElementById('leg-0');
+                    if (firstLegRow) {
+                        firstLegRow.querySelectorAll('.action-btn.selected, .option-type-btn.selected').forEach(btn => {
+                            btn.classList.remove('selected');
+                        });
+                        const firstActionInput = firstLegRow.querySelector('.leg-action-input');
+                        if(firstActionInput) firstActionInput.value = '';
+                        const firstOptionTypeInput = firstLegRow.querySelector('.leg-option-type-input');
+                        if(firstOptionTypeInput) firstOptionTypeInput.value = '';
+                        // Re-initialize datepicker for the first leg's date input
+                        const initialDateInput = firstLegRow.querySelector('input[type="date"].flatpickr-input');
+                        if (initialDateInput && initialDateInput._flatpickr) { // Check if flatpickr is initialized
+                            initialDateInput._flatpickr.clear(); // Clear flatpickr date
+                        } else if (initialDateInput) { // If not flatpickr, just clear value
+                            initialDateInput.value = '';
+                        }
+
+                    }
+                    const legRowsToRemove = legsContainer.querySelectorAll('.leg-row:not(#leg-0)');
+                    legRowsToRemove.forEach(row => row.remove());
+                    legCounter = 1;
+                    updateLegNumbers();
+
+                    fetchAndDisplayStrategies();
+                } else {
+                    showPopup('Error', data.message || 'Ocurrió un error al guardar la estrategia.', 'error');
+                }
+            })
+            .catch((error) => {
+                console.error('Error saving strategy:', error);
+                showPopup('Error de Red', 'No se pudo conectar con el servidor. Inténtalo de nuevo.', 'error');
+            });
+        };
+    }
 });

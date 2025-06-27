@@ -362,3 +362,235 @@ button[type="submit"]:hover, #addLegBtn:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: #666;
 }
+
+/* --- Flatpickr Dark Theme Customizations --- */
+/* Ensure flatpickr inputs look like other inputs */
+input.flatpickr-input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 18px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background-color: #36363a; /* Matches other inputs */
+    color: #e0e0e0;
+    font-size: 1em;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    line-height: normal; /* Override flatpickr's line-height if it causes issues */
+}
+input.flatpickr-input:focus { /* Matches other inputs focus */
+    border-color: #007acc;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 3px rgba(0, 122, 204, 0.3);
+    outline: none;
+}
+
+/* Calendar container */
+.flatpickr-calendar {
+    background: #2d2d30; /* Matches form-container background */
+    border-color: #444;
+    border-radius: 8px; /* Softer radius */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Consistent shadow */
+}
+
+/* Days */
+.flatpickr-day {
+    color: #c0c0c0;
+    border-color: transparent; /* Remove default borders inside calendar */
+}
+.flatpickr-day:hover, .flatpickr-day:focus {
+    background: #3a3a3d;
+    color: #fff;
+    border-color: #3a3a3d;
+}
+.flatpickr-day.today {
+    border-color: #007acc; /* Accent for today */
+    color: #00aeff;
+}
+.flatpickr-day.today:hover {
+    background: #007acc;
+    color: #fff;
+}
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+    background: #007acc; /* Accent for selected */
+    border-color: #007acc;
+    color: #fff;
+    box-shadow: none; /* Remove default flatpickr shadow for selected day if any */
+}
+.flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover{
+    background: #005c99;
+    border-color: #005c99;
+}
+
+
+/* Month/Year navigation */
+.flatpickr-months .flatpickr-month {
+    color: #e0e0e0; /* Light text for month name */
+    fill: #e0e0e0; /* For SVG icons if any */
+}
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    color: #00aeff; /* Accent for nav arrows */
+    fill: #00aeff;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+}
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    color: #fff;
+    fill: #fff;
+    background: #3a3a3d;
+}
+
+/* --- Pop-up Modal Styling --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: #2d2d30; /* Dark background for modal */
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    position: relative;
+    width: 90%;
+    max-width: 450px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    overflow: hidden; /* To contain sparkles if they go wild */
+}
+.modal-overlay.visible .modal-content {
+    transform: scale(1);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.close-btn:hover {
+    color: #fff;
+}
+
+.popup-icon {
+    font-size: 48px; /* Large icon */
+    margin-bottom: 15px;
+}
+.popup-icon.success { color: #28a745; } /* Green for success */
+.popup-icon.error { color: #dc3545; } /* Red for error */
+
+.modal-content h3 { /* Popup Title */
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+    font-size: 1.5em;
+}
+.modal-content p { /* Popup Message */
+    margin-bottom: 20px;
+    color: #c0c0c0;
+    font-size: 1.1em;
+}
+
+/* Sparkle Animation */
+.popup-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* So they don't interfere with clicks */
+    overflow: hidden; /* Keep them contained if necessary */
+}
+
+.sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #00aeff; /* Sparkle color - can vary */
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkle-animation 1.2s ease-out forwards;
+}
+
+.popup-icon.success ~ .popup-sparkles .sparkle { /* Only show sparkles on success */
+    background-color: #28a745; /* Green sparkles */
+}
+.popup-icon.success ~ .popup-sparkles .sparkle.s2,
+.popup-icon.success ~ .popup-sparkles .sparkle.s4 {
+    background-color: #50c878; /* Lighter green */
+}
+
+
+/* Individual sparkle positions and delays */
+.sparkle.s1 { top: 20%; left: 15%; animation-delay: 0s; }
+.sparkle.s2 { top: 30%; left: 80%; animation-delay: 0.2s; }
+.sparkle.s3 { top: 70%; left: 10%; animation-delay: 0.4s; }
+.sparkle.s4 { top: 80%; left: 70%; animation-delay: 0.6s; }
+.sparkle.s5 { top: 50%; left: 50%; animation-delay: 0.8s; background-color: #00aeff; } /* Central accent sparkle */
+.popup-icon.success ~ .popup-sparkles .sparkle.s5 { background-color: #fff; }
+
+
+@keyframes sparkle-animation {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+.numInputWrapper .numInput { /* Year input */
+    color: #e0e0e0;
+    background: #36363a;
+    border-color: #444;
+}
+.numInputWrapper span:hover {
+    background: #3a3a3d;
+}
+
+/* Weekdays header */
+.flatpickr-weekday {
+    color: #b0b0b0; /* Lighter text for weekday names */
+    font-weight: 500;
+}
+
+/* Time picker (if used, not in current config but good to have basic styles) */
+.flatpickr-time {
+    background: #2d2d30;
+    border-top-color: #444;
+}
+.flatpickr-time input, .flatpickr-time .flatpickr-am-pm {
+    color: #e0e0e0;
+    background: #36363a;
+    border-color: #444;
+}
+.flatpickr-time input:hover, .flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time input:focus, .flatpickr-time .flatpickr-am-pm:focus {
+    background: #3a3a3d;
+}

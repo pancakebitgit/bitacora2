@@ -13,6 +13,8 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
     - **Tema Oscuro Moderno:** Interfaz con un diseño profesional oscuro, con efectos de relieve.
     - **Panel Lateral de Navegación:** Permite filtrar estrategias por mes de vencimiento.
     - **Vista Detallada Interactiva:** Detalles de estrategias expandibles con transiciones suaves.
+    - **Calendario Personalizado:** Selector de fecha de vencimiento mejorado y temático.
+    - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones.
     - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento.
 
 
