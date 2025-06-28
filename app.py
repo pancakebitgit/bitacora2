@@ -361,6 +361,101 @@ def delete_strategy(trade_id):
         # flash(f'Error al eliminar la estrategia: {str(e)}', 'error')
         return jsonify(success=False, message=f"Error interno del servidor al eliminar: {str(e)}"), 500
 
+@app.route('/api/update_strategy/<int:trade_id>', methods=['PUT'])
+def update_strategy(trade_id):
+    try:
+        trade_to_update = Trade.query.get(trade_id)
+        if not trade_to_update:
+            return jsonify(success=False, message="Estrategia no encontrada para actualizar."), 404
+
+        data = request.form
+        files = request.files
+
+        # Actualizar campos escalares del Trade
+        trade_to_update.ticker = data.get('ticker', trade_to_update.ticker)
+        entry_date_str = data.get('entryDate')
+        if entry_date_str:
+            try:
+                trade_to_update.entry_date = datetime.fromisoformat(entry_date_str)
+            except ValueError:
+                return jsonify(success=False, message="Formato de Fecha de Entrada inválido para actualizar."), 400
+        trade_to_update.notes = data.get('marketVision', trade_to_update.notes)
+
+        # Manejo de Legs: Eliminar los antiguos y crear nuevos
+        # Eliminar legs existentes
+        for leg in trade_to_update.legs:
+            db.session.delete(leg)
+        # db.session.flush() # Asegurar que se eliminan antes de añadir nuevos si hay constraints, o simplemente dejar que el commit lo maneje.
+        trade_to_update.legs = [] # Limpiar la colección en el objeto
+
+        new_legs_data = [] # Para recalcular estrategia y riesgo
+        leg_index = 0
+        while True:
+            action_key = f'legs[{leg_index}][action]'
+            if action_key not in data:
+                break
+
+            action = data.get(action_key)
+            quantity_str = data.get(f'legs[{leg_index}][quantity]')
+            option_type = data.get(f'legs[{leg_index}][option_type]')
+            expiration_date_str = data.get(f'legs[{leg_index}][expirationDate]')
+            strike_str = data.get(f'legs[{leg_index}][strike]')
+            premium_str = data.get(f'legs[{leg_index}][premium]')
+
+            if not all([action, quantity_str, option_type, expiration_date_str, strike_str, premium_str]):
+                return jsonify(success=False, message=f'Datos incompletos para el Leg {leg_index + 1} en actualización.'), 400
+
+            try:
+                quantity = int(quantity_str)
+                strike = float(strike_str)
+                premium = float(premium_str)
+                expiration_date_obj = date.fromisoformat(expiration_date_str)
+            except ValueError as e:
+                return jsonify(success=False, message=f'Error en datos para Leg {leg_index + 1} en actualización: {e}'), 400
+
+            new_leg_obj_data = {
+                'action': action, 'quantity': quantity, 'option_type': option_type,
+                'expiration_date': expiration_date_obj, 'strike': strike, 'premium': premium
+            }
+            new_legs_data.append(new_leg_obj_data) # Para el recognizer/calculator
+
+            leg_to_add = Leg(
+                action=action, quantity=quantity, option_type=option_type,
+                expiration_date=expiration_date_obj, strike=strike, premium=premium,
+                trade_id=trade_to_update.id # Asociar al trade existente
+            )
+            trade_to_update.legs.append(leg_to_add) # SQLAlchemy manejará la relación
+            leg_index += 1
+
+        if not new_legs_data: # Debe haber al menos un leg
+             return jsonify(success=False, message='La estrategia actualizada debe tener al menos un leg.'), 400
+
+        # Recalcular estrategia y riesgo/beneficio
+        trade_to_update.detected_strategy = recognize_strategy(new_legs_data)
+        risk_profit_profile = calculate_max_risk_profit(trade_to_update.detected_strategy, new_legs_data)
+        trade_to_update.max_risk = risk_profit_profile.get('max_risk')
+        trade_to_update.max_profit = risk_profit_profile.get('max_profit')
+
+        # Manejo de Imágenes: Añadir nuevas imágenes, las existentes se mantienen.
+        # La eliminación granular de imágenes no se implementa en este paso.
+        if 'images[]' in files:
+            image_files = files.getlist('images[]')
+            for file in image_files:
+                if file and file.filename and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(save_path)
+                    new_image = Image(filename=filename, trade_id=trade_to_update.id)
+                    trade_to_update.images.append(new_image)
+
+        db.session.commit()
+        return jsonify(success=True, message="Estrategia actualizada exitosamente.", strategy=trade_to_update.to_dict())
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating strategy: {e}")
+        return jsonify(success=False, message=f"Error interno del servidor al actualizar: {str(e)}"), 500
+
 
 # --- App Initialization ---
 if __name__ == '__main__':
