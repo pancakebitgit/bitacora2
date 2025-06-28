@@ -52,13 +52,14 @@ body {
     color: #c0c0c0; /* Lighter text for nav links */
     border-radius: 6px;
     margin-bottom: 8px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; /* Added transform */
     border: 1px solid transparent; /* For border transition if needed */
 }
 
 #expiration-nav a:hover {
     background-color: #3a3a3d; /* Hover background */
     color: #ffffff;
+    transform: translateX(5px); /* Slight push on hover */
 }
 
 #expiration-nav a.active {
@@ -174,10 +175,14 @@ button[type="submit"], #addLegBtn {
     background-color: #007acc; /* Primary action color */
     color: white;
     margin-top: 10px;
+    /* Neon effect for primary buttons */
+    box-shadow: 0 0 5px #00aeff, 0 0 10px #00aeff, 0 0 15px #00aeff, 0 2px 5px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 button[type="submit"]:hover, #addLegBtn:hover {
     background-color: #005c99; /* Darker shade on hover */
+    box-shadow: 0 0 8px #00aeff, 0 0 15px #00aeff, 0 0 20px #00aeff, 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
 }
+
 
 /* Leg Row Styling */
 .leg-row {
@@ -187,7 +192,20 @@ button[type="submit"]:hover, #addLegBtn:hover {
     border-radius: 8px;
     background-color: #333336; /* Slightly different dark for leg rows */
     box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    animation: leg-fade-in 0.5s ease-out; /* Animation for new legs */
 }
+
+@keyframes leg-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .leg-row h3 {
     margin-top: 0;
     font-size: 1.2em;
@@ -213,11 +231,24 @@ button[type="submit"]:hover, #addLegBtn:hover {
     color: white;
     border-width: 1px; /* Keep consistent border */
     box-shadow: inset 0 0 8px rgba(0,0,0,0.5); /* "Pressed" effect */
+    /* Adding subtle neon glow to selected state */
 }
-.action-btn.buy.selected { background-color: #28a745; border-color: #1e7e34;} /* Green for Buy */
-.action-btn.sell.selected { background-color: #dc3545; border-color: #b02a37;} /* Red for Sell */
-.option-type-btn.call.selected { background-color: #007bff; border-color: #0056b3;} /* Blue for Call */
-.option-type-btn.put.selected { background-color: #ffc107; color: #333; border-color: #d39e00;} /* Yellow for Put */
+.action-btn.buy.selected {
+    background-color: #28a745; border-color: #1e7e34;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 8px #28a745;
+}
+.action-btn.sell.selected {
+    background-color: #dc3545; border-color: #b02a37;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 8px #dc3545;
+}
+.option-type-btn.call.selected {
+    background-color: #007bff; border-color: #0056b3;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 8px #007bff;
+}
+.option-type-btn.put.selected {
+    background-color: #ffc107; color: #333; border-color: #d39e00;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 8px #ffc107;
+}
 
 
 .remove-leg-btn {
@@ -241,7 +272,20 @@ button[type="submit"]:hover, #addLegBtn:hover {
     background-color: #2c2f33; /* Card-like bg for month group */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    animation: content-fade-in 0.5s ease-out; /* Animation for month groups */
 }
+
+@keyframes content-fade-in { /* General fade-in for content blocks */
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .expiration-month-group h3 { /* Month headers */
     background-color: transparent; /* Remove previous bg */
     color: #00aeff; /* Accent color */
@@ -259,7 +303,16 @@ button[type="submit"]:hover, #addLegBtn:hover {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: content-fade-in 0.4s ease-out; /* Apply fade-in to cards */
+    animation-fill-mode: backwards; /* Start animation from "from" state even if delayed */
 }
+
+/* Staggered animation for strategy cards if possible via JS, or just a general one */
+/* For pure CSS, a slight delay can be added if cards are always rendered together */
+/* This would require more complex selectors or JS to add delays. */
+/* For now, they will all fade in together with a 0.4s duration. */
+
+
 .strategy-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.4);
