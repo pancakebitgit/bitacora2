@@ -444,69 +444,63 @@ def update_strategy(trade_id):
         # Para saber si se envían nuevos legs, podemos chequear la presencia de 'legs[0][action]'
         if 'legs[0][action]' in data:
             # Eliminar legs existentes
-        for leg in trade_to_update.legs:
-            db.session.delete(leg)
-        # db.session.flush() # Asegurar que se eliminan antes de añadir nuevos si hay constraints, o simplemente dejar que el commit lo maneje.
-        trade_to_update.legs = [] # Limpiar la colección en el objeto
+            for leg in trade_to_update.legs:
+                db.session.delete(leg)
+            trade_to_update.legs = [] # Limpiar la colección en el objeto
 
-        new_legs_data = [] # Para recalcular estrategia y riesgo
-        leg_index = 0
-        while True:
-            action_key = f'legs[{leg_index}][action]'
-            if action_key not in data:
-                break
+            new_legs_data = [] # Para recalcular estrategia y riesgo
+            leg_index = 0
+            while True:
+                action_key = f'legs[{leg_index}][action]'
+                if action_key not in data: # Esto terminará el bucle si no hay más legs enviados
+                    break
 
-            action = data.get(action_key)
-            quantity_str = data.get(f'legs[{leg_index}][quantity]')
-            option_type = data.get(f'legs[{leg_index}][option_type]')
-            expiration_date_str = data.get(f'legs[{leg_index}][expirationDate]')
-            strike_str = data.get(f'legs[{leg_index}][strike]')
-            premium_str = data.get(f'legs[{leg_index}][premium]')
+                # Si llegamos aquí, es porque 'legs[0][action]' existía, así que esperamos un conjunto completo de legs.
+                # Si un leg intermedio falta, el `data.get` devolverá None y la validación de abajo fallará.
+                action = data.get(action_key)
+                quantity_str = data.get(f'legs[{leg_index}][quantity]')
+                option_type = data.get(f'legs[{leg_index}][option_type]')
+                expiration_date_str = data.get(f'legs[{leg_index}][expirationDate]')
+                strike_str = data.get(f'legs[{leg_index}][strike]')
+                premium_str = data.get(f'legs[{leg_index}][premium]')
 
-            if not all([action, quantity_str, option_type, expiration_date_str, strike_str, premium_str]):
-                return jsonify(success=False, message=f'Datos incompletos para el Leg {leg_index + 1} en actualización.'), 400
+                if not all([action, quantity_str, option_type, expiration_date_str, strike_str, premium_str]):
+                    # Si se envían legs (ej. legs[0][action] está presente) pero un leg está incompleto, es un error.
+                    return jsonify(success=False, message=f'Datos incompletos para el Leg {leg_index + 1} en actualización.'), 400
 
-            try:
-                quantity = int(quantity_str)
-                strike = float(strike_str)
-                premium = float(premium_str)
-                expiration_date_obj = date.fromisoformat(expiration_date_str)
-            except ValueError as e:
-                return jsonify(success=False, message=f'Error en datos para Leg {leg_index + 1} en actualización: {e}'), 400
+                try:
+                    quantity = int(quantity_str)
+                    strike = float(strike_str)
+                    premium = float(premium_str)
+                    expiration_date_obj = date.fromisoformat(expiration_date_str)
+                except ValueError as e:
+                    return jsonify(success=False, message=f'Error en datos para Leg {leg_index + 1} en actualización: {e}'), 400
 
-            new_leg_obj_data = {
-                'action': action, 'quantity': quantity, 'option_type': option_type,
-                'expiration_date': expiration_date_obj, 'strike': strike, 'premium': premium
-            }
-            new_legs_data.append(new_leg_obj_data) # Para el recognizer/calculator
+                new_leg_obj_data = {
+                    'action': action, 'quantity': quantity, 'option_type': option_type,
+                    'expiration_date': expiration_date_obj, 'strike': strike, 'premium': premium
+                }
+                new_legs_data.append(new_leg_obj_data)
 
-            leg_to_add = Leg(
-                action=action, quantity=quantity, option_type=option_type,
-                expiration_date=expiration_date_obj, strike=strike, premium=premium,
-                trade_id=trade_to_update.id # Asociar al trade existente
-            )
-            trade_to_update.legs.append(leg_to_add) # SQLAlchemy manejará la relación
-            leg_index += 1
+                leg_to_add = Leg(
+                    action=action, quantity=quantity, option_type=option_type,
+                    expiration_date=expiration_date_obj, strike=strike, premium=premium,
+                    trade_id=trade_to_update.id
+                )
+                trade_to_update.legs.append(leg_to_add)
+                leg_index += 1
 
-        if not new_legs_data: # Debe haber al menos un leg
-             return jsonify(success=False, message='La estrategia actualizada debe tener al menos un leg.'), 400
+            if not new_legs_data and 'legs[0][action]' in data : # Si se intentó enviar legs pero resultaron vacíos (error)
+                 return jsonify(success=False, message='Si se envían legs para actualizar, al menos uno debe ser válido.'), 400
 
-            # Recalcular con los nuevos legs
-            trade_to_update.detected_strategy = recognize_strategy(new_legs_data)
-            risk_profit_profile = calculate_max_risk_profit(trade_to_update.detected_strategy, new_legs_data)
-            trade_to_update.max_risk = risk_profit_profile.get('max_risk')
-            trade_to_update.max_profit = risk_profit_profile.get('max_profit')
-        else:
-            # Si los legs no se modificaron, pero otros campos sí (ej. ticker, notas),
-            # la estrategia detectada y el riesgo/beneficio no deberían cambiar.
-            # No es necesario recalcularlos a menos que los legs sean la fuente de verdad.
-            # Para consistencia, si los legs NO se envían, asumimos que no cambian y los valores de estrategia/riesgo tampoco.
-            # Si se quisiera recalcular siempre, se necesitaría convertir trade_to_update.legs a formato dict:
-            # current_legs_for_calc = [{'action': l.action, ...} for l in trade_to_update.legs]
-            # trade_to_update.detected_strategy = recognize_strategy(current_legs_for_calc)
-            # ... y así sucesivamente. Por ahora, no se recalcula si los legs no se envían.
-            pass
-
+            if new_legs_data: # Solo recalcular si efectivamente se procesaron nuevos legs
+                trade_to_update.detected_strategy = recognize_strategy(new_legs_data)
+                risk_profit_profile = calculate_max_risk_profit(trade_to_update.detected_strategy, new_legs_data)
+                trade_to_update.max_risk = risk_profit_profile.get('max_risk')
+                trade_to_update.max_profit = risk_profit_profile.get('max_profit')
+        # else: (si no 'legs[0][action]' in data)
+            # No se enviaron legs, por lo tanto, los legs existentes,
+            # la estrategia detectada y el riesgo/beneficio no se modifican.
 
         # Manejo de Imágenes: Añadir nuevas imágenes, las existentes se mantienen.
         # La eliminación granular de imágenes no se implementa en este paso.
