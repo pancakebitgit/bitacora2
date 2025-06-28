@@ -15,6 +15,7 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
     - **Vista Detallada Interactiva:** Detalles de estrategias expandibles con transiciones suaves.
     - **Calendario Personalizado:** Selector de fecha de vencimiento mejorado y temático (Flatpickr).
     - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones (incluyendo "destellos" para éxito).
+    - **Eliminación de Operaciones:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
     - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con animaciones de carga.
 
 
@@ -96,10 +97,10 @@ La aplicación estará disponible en `http://127.0.0.1:5000` por defecto.
 ├── migrations/               # Archivos de Flask-Migrate para la base de datos
 ├── instance/                 # Contiene la base de datos SQLite (options_log.sqlite3)
 │   └── options_log.sqlite3
-├── static/                   # Archivos estáticos (CSS, JS, imágenes subidas)
+├── static/                   # Archivos estáticos (CSS, JS)
 │   ├── css/style.css
 │   ├── js/main.js
-│   └── uploads/              # Directorio para imágenes cargadas por el usuario
+│   └── uploads/              # Directorio para imágenes cargadas por el usuario (DENTRO de static)
 └── templates/                # Plantillas HTML (index.html)
     └── index.html
 ```

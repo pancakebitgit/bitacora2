@@ -25,9 +25,17 @@ db_uri = f'sqlite:///{db_path}'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_default_secret_key_12345!') # Add a default for safety
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri # Directly use the absolute path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = os.path.join(project_root_path, 'uploads') # Define an upload folder
+# Correct UPLOAD_FOLDER to be inside 'static'
+app.config['UPLOAD_FOLDER'] = os.path.join(project_root_path, 'static', 'uploads')
 
-# Ensure the upload folder exists
+# Ensure the static folder exists (Flask usually handles this, but good for uploads subfolder)
+static_path = os.path.join(project_root_path, 'static')
+try:
+    os.makedirs(static_path, exist_ok=True)
+except OSError as e:
+    print(f"Error creating static folder: {e}")
+
+# Ensure the upload folder (static/uploads) exists
 try:
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 except OSError as e:
@@ -319,6 +327,39 @@ def save_strategy():
             return jsonify(success=False, message=f"Error interno del servidor: {str(e)}"), 500
 
     return jsonify(success=False, message="Método no permitido."), 405
+
+@app.route('/api/delete_strategy/<int:trade_id>', methods=['DELETE'])
+def delete_strategy(trade_id):
+    try:
+        trade_to_delete = Trade.query.get(trade_id)
+        if not trade_to_delete:
+            return jsonify(success=False, message="Estrategia no encontrada."), 404
+
+        # Delete associated image files from server
+        for image in trade_to_delete.images:
+            try:
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    print(f"Deleted image file: {filepath}")
+                else:
+                    print(f"Image file not found, skipping deletion: {filepath}")
+            except Exception as e:
+                print(f"Error deleting image file {image.filename}: {e}")
+                # Decide if this error should prevent trade deletion or just be logged
+                # For now, we'll log and continue with trade deletion from DB
+
+        db.session.delete(trade_to_delete)
+        db.session.commit()
+
+        # flash('Estrategia eliminada exitosamente.', 'success') # Not very useful for API
+        return jsonify(success=True, message="Estrategia eliminada exitosamente.")
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting strategy: {e}")
+        # flash(f'Error al eliminar la estrategia: {str(e)}', 'error')
+        return jsonify(success=False, message=f"Error interno del servidor al eliminar: {str(e)}"), 500
 
 
 # --- App Initialization ---
