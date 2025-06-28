@@ -55,8 +55,14 @@ class Trade(db.Model):
     max_risk = db.Column(db.Float, nullable=True)
     max_profit = db.Column(db.Float, nullable=True)
 
-    legs = db.relationship('Leg', backref='trade', lazy='joined', cascade="all, delete-orphan") # Use 'joined' for eager loading
-    images = db.relationship('Image', backref='trade', lazy='joined', cascade="all, delete-orphan") # Use 'joined' for eager loading
+    legs = db.relationship('Leg', backref='trade', lazy='joined', cascade="all, delete-orphan")
+    images = db.relationship('Image', backref='trade', lazy='joined', cascade="all, delete-orphan")
+
+    # New fields for closing trades
+    status = db.Column(db.String(20), default='Abierta', nullable=False) # e.g., "Abierta", "Cerrada"
+    closing_date = db.Column(db.DateTime, nullable=True)
+    actual_pl = db.Column(db.Float, nullable=True)
+    closing_notes = db.Column(db.Text, nullable=True)
 
     def to_dict(self):
         primary_exp_str = None
@@ -75,7 +81,12 @@ class Trade(db.Model):
             'max_profit': self.max_profit,
             'legs': [leg.to_dict() for leg in self.legs],
             'images': [img.to_dict() for img in self.images],
-            'primary_expiration_date_str': primary_exp_str
+            'primary_expiration_date_str': primary_exp_str,
+            # Add new fields to serialization
+            'status': self.status,
+            'closing_date': self.closing_date.isoformat() if self.closing_date else None,
+            'actual_pl': self.actual_pl,
+            'closing_notes': self.closing_notes
         }
 
     def __repr__(self):
@@ -455,6 +466,58 @@ def update_strategy(trade_id):
         db.session.rollback()
         print(f"Error updating strategy: {e}")
         return jsonify(success=False, message=f"Error interno del servidor al actualizar: {str(e)}"), 500
+
+@app.route('/api/trade/<int:trade_id>/close', methods=['POST'])
+def close_trade(trade_id):
+    try:
+        trade_to_close = Trade.query.get(trade_id)
+        if not trade_to_close:
+            return jsonify(success=False, message="Operación no encontrada."), 404
+
+        if trade_to_close.status == 'Cerrada':
+            return jsonify(success=False, message="Esta operación ya está cerrada."), 400
+
+        data = request.get_json()
+        if not data:
+            return jsonify(success=False, message="No se recibieron datos para cerrar la operación."), 400
+
+        actual_pl_str = data.get('actual_pl')
+        closing_date_str = data.get('closing_date_str') # Expecting YYYY-MM-DD from flatpickr
+        closing_notes = data.get('closing_notes', '')
+
+        if actual_pl_str is None: # P/L es obligatorio para cerrar
+            return jsonify(success=False, message="El P/L real es obligatorio para cerrar la operación."), 400
+
+        try:
+            actual_pl = float(actual_pl_str)
+        except ValueError:
+            return jsonify(success=False, message="El P/L real debe ser un número."), 400
+
+        closing_date_obj = None
+        if closing_date_str:
+            try:
+                closing_date_obj = datetime.strptime(closing_date_str, '%Y-%m-%d').date()
+                # Si quieres guardar hora también, y el input es datetime:
+                # closing_date_obj = datetime.fromisoformat(closing_date_str)
+            except ValueError:
+                return jsonify(success=False, message="Formato de fecha de cierre inválido. Usar YYYY-MM-DD."), 400
+        else:
+            closing_date_obj = datetime.utcnow().date() # Default to today (date part only)
+            # Si quieres guardar hora también: closing_date_obj = datetime.utcnow()
+
+
+        trade_to_close.status = 'Cerrada'
+        trade_to_close.actual_pl = actual_pl
+        trade_to_close.closing_date = closing_date_obj
+        trade_to_close.closing_notes = closing_notes
+
+        db.session.commit()
+        return jsonify(success=True, message="Operación cerrada exitosamente.", strategy=trade_to_close.to_dict())
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error closing trade: {e}")
+        return jsonify(success=False, message=f"Error interno del servidor al cerrar la operación: {str(e)}"), 500
 
 
 # --- App Initialization ---

@@ -21,11 +21,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const popupTitleEl = document.getElementById('popupTitle');
     const popupMessageEl = document.getElementById('popupMessage');
 
-    // Image Modal elements are now fetched inside their respective functions
-    // to ensure DOM availability.
-    // const imageModalOverlay = document.getElementById('imageModalOverlay'); // Moved
-    // const closeImageModalBtn = document.getElementById('closeImageModalBtn'); // Moved
-    // const fullImageDisplay = document.getElementById('fullImageDisplay'); // Moved
+    // Image Modal elements
+    const imageModalOverlay = document.getElementById('imageModalOverlay');
+    const closeImageModalBtn = document.getElementById('closeImageModalBtn');
+    const fullImageDisplay = document.getElementById('fullImageDisplay');
+
+    // Close Trade Modal elements
+    const closeTradeModalOverlay = document.getElementById('closeTradeModalOverlay');
+    const closeCloseTradeModalBtn = document.getElementById('closeCloseTradeModalBtn');
+    const closeTradeForm = document.getElementById('closeTradeForm');
+    const closeTradeIdField = document.getElementById('closeTradeIdField');
+    const actualPlInput = document.getElementById('actualPlInput');
+    const closingDateInput = document.getElementById('closingDateInput');
+    const closingNotesInput = document.getElementById('closingNotesInput');
 
 
     // --- Initialization ---
@@ -48,18 +56,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Datepicker Initialization ---
-    function initializeDatepicker(element) {
+    function initializeDatepicker(element, options = {}) {
         if(element && typeof flatpickr === 'function') {
-            flatpickr(element, {
+            const defaultConfig = {
                 dateFormat: "Y-m-d",
                 altInput: true,
                 altFormat: "d M, Y",
-            });
+            };
+            flatpickr(element, {...defaultConfig, ...options});
         }
     }
+    // Initialize datepicker for closing date input
+    if (closingDateInput) initializeDatepicker(closingDateInput);
+
 
     // --- Leg Management ---
-    function updateLegNumbers() {
+    function updateLegNumbers() { /* ... (no changes) ... */
         const legRows = legsContainer.querySelectorAll('.leg-row');
         legRows.forEach((legRow, index) => {
             const h3 = legRow.querySelector('h3');
@@ -70,8 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    function setupButtonToggle(legRow) {
+    function setupButtonToggle(legRow) { /* ... (no changes) ... */
         const actionButtons = legRow.querySelectorAll('.action-btn');
         const actionInput = legRow.querySelector('.leg-action-input');
         actionButtons.forEach(btn => {
@@ -91,42 +102,19 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
-    function addLeg(indexToUse = null) {
+    function addLeg(indexToUse = null) { /* ... (no changes, ensure it returns newLegRow) ... */
         const currentIndex = (indexToUse !== null) ? indexToUse : legCounter;
         const newLegRow = document.createElement('div');
         newLegRow.classList.add('leg-row');
         newLegRow.id = `leg-${currentIndex}`;
         newLegRow.innerHTML = `
             <h3>Leg ${currentIndex + 1}</h3>
-            <div>
-                <label>Acción:</label> <!-- No 'for' needed as it's for the button group -->
-                <button type="button" class="action-btn buy" data-action="BUY">COMPRA</button>
-                <button type="button" class="action-btn sell" data-action="SELL">VENTA</button>
-                <input type="hidden" id="leg_${currentIndex}_action" name="legs[${currentIndex}][action]" class="leg-action-input" required>
-            </div>
-            <div>
-                <label for="leg_${currentIndex}_quantity">Cantidad:</label>
-                <input type="number" id="leg_${currentIndex}_quantity" name="legs[${currentIndex}][quantity]" min="1" value="1" required>
-            </div>
-            <div>
-                <label>Tipo:</label> <!-- No 'for' needed as it's for the button group -->
-                <button type="button" class="option-type-btn call" data-type="CALL">CALL</button>
-                <button type="button" class="option-type-btn put" data-type="PUT">PUT</button>
-                <input type="hidden" id="leg_${currentIndex}_option_type" name="legs[${currentIndex}][option_type]" class="leg-option-type-input" required>
-            </div>
-            <div>
-                <label for="leg_${currentIndex}_expirationDate">Fecha de Vencimiento:</label>
-                <input type="date" id="leg_${currentIndex}_expirationDate" name="legs[${currentIndex}][expirationDate]" required>
-            </div>
-            <div>
-                <label for="leg_${currentIndex}_strike">Strike:</label>
-                <input type="number" step="any" id="leg_${currentIndex}_strike" name="legs[${currentIndex}][strike]" required>
-            </div>
-            <div>
-                <label for="leg_${currentIndex}_premium">Prima:</label>
-                <input type="number" step="any" id="leg_${currentIndex}_premium" name="legs[${currentIndex}][premium]" required>
-            </div>
+            <div><label>Acción:</label><button type="button" class="action-btn buy" data-action="BUY">COMPRA</button><button type="button" class="action-btn sell" data-action="SELL">VENTA</button><input type="hidden" id="leg_${currentIndex}_action" name="legs[${currentIndex}][action]" class="leg-action-input" required></div>
+            <div><label for="leg_${currentIndex}_quantity">Cantidad:</label><input type="number" id="leg_${currentIndex}_quantity" name="legs[${currentIndex}][quantity]" min="1" value="1" required></div>
+            <div><label>Tipo:</label><button type="button" class="option-type-btn call" data-type="CALL">CALL</button><button type="button" class="option-type-btn put" data-type="PUT">PUT</button><input type="hidden" id="leg_${currentIndex}_option_type" name="legs[${currentIndex}][option_type]" class="leg-option-type-input" required></div>
+            <div><label for="leg_${currentIndex}_expirationDate">Fecha de Vencimiento:</label><input type="date" id="leg_${currentIndex}_expirationDate" name="legs[${currentIndex}][expirationDate]" required></div>
+            <div><label for="leg_${currentIndex}_strike">Strike:</label><input type="number" step="any" id="leg_${currentIndex}_strike" name="legs[${currentIndex}][strike]" required></div>
+            <div><label for="leg_${currentIndex}_premium">Prima:</label><input type="number" step="any" id="leg_${currentIndex}_premium" name="legs[${currentIndex}][premium]" required></div>
             <button type="button" class="remove-leg-btn">Eliminar Leg</button>`;
         legsContainer.appendChild(newLegRow);
         setupButtonToggle(newLegRow);
@@ -143,12 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (indexToUse === null) legCounter++;
         updateLegNumbers();
         return newLegRow;
-    }
-
+     }
     if (addLegBtn) addLegBtn.addEventListener('click', () => addLeg(null));
 
     // --- Form Population for Edit & Reset ---
-    function populateFormForEdit(tradeId) {
+    function populateFormForEdit(tradeId) { /* ... (no changes) ... */
         const trade = allFetchedStrategies.find(s => s.id === parseInt(tradeId));
         if (!trade) {
             showPopup('Error', 'No se encontró la estrategia para editar.', 'error');
@@ -189,8 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (formSubmitButton) formSubmitButton.textContent = 'Actualizar Estrategia';
         document.getElementById('strategyForm').scrollIntoView({ behavior: 'smooth' });
     }
-
-    function resetFormToCreateMode() {
+    function resetFormToCreateMode() { /* ... (no changes) ... */
         editingTradeId = null;
         if (editingTradeIdField) editingTradeIdField.value = '';
         if (strategyForm) strategyForm.reset();
@@ -203,10 +189,10 @@ document.addEventListener('DOMContentLoaded', function() {
             entryDateField.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
             if(entryDateField._flatpickr) entryDateField._flatpickr.setDate(entryDateField.value, true);
         }
-    }
+     }
 
     // --- Form Submission (Create/Update) ---
-    if (strategyForm) {
+    if (strategyForm) { /* ... (no changes) ... */
         strategyForm.onsubmit = function(event) {
             event.preventDefault();
             let firstValidationError = null;
@@ -258,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Notification Pop-up Modal Logic ---
-    function showPopup(title, message, type = 'success') {
+    function showPopup(title, message, type = 'success') { /* ... (no changes) ... */
         if (!popupModal || !popupTitleEl || !popupMessageEl || !popupIconEl) return;
         popupTitleEl.textContent = title;
         popupMessageEl.textContent = message;
@@ -274,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
         popupModal.style.display = 'flex';
         setTimeout(() => { popupModal.classList.add('visible'); }, 20);
     }
-    function hidePopup() {
+    function hidePopup() { /* ... (no changes) ... */
         if (!popupModal) return;
         popupModal.classList.remove('visible');
         setTimeout(() => {
@@ -285,43 +271,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if (popupModal) popupModal.addEventListener('click', function(event) { if (event.target === popupModal) hidePopup(); });
 
     // --- Image Modal Logic ---
-    function showImageModal(imageUrl) {
-        console.log("--- Attempting to show image modal ---"); // Specific log
-        console.log("Searching for ID: 'imageModalOverlay'"); // Specific log
+    function showImageModal(imageUrl) { /* ... (no changes) ... */
         const imageModalOverlay = document.getElementById('imageModalOverlay');
-        console.log("Element found for 'imageModalOverlay':", imageModalOverlay); // Specific log
-
-        console.log("Searching for ID: 'fullImageDisplay'"); // Specific log
         const fullImageDisplay = document.getElementById('fullImageDisplay');
-        console.log("Element found for 'fullImageDisplay':", fullImageDisplay); // Specific log
-
-        // The original console.log for the URL can remain if desired, or be removed if too verbose
-        // console.log("showImageModal called with URL:", imageUrl);
-
-        if (!imageModalOverlay) {
-            console.error("CRITICAL: imageModalOverlay element NOT FOUND at the moment of call!");
-            return;
-        }
-        if (!fullImageDisplay) {
-            console.error("CRITICAL: fullImageDisplay element NOT FOUND at the moment of call!");
-            return;
-        }
-
+        if (!imageModalOverlay) { console.error("CRITICAL: imageModalOverlay element NOT FOUND at the moment of call!"); return; }
+        if (!fullImageDisplay) { console.error("CRITICAL: fullImageDisplay element NOT FOUND at the moment of call!"); return; }
         fullImageDisplay.src = imageUrl;
         imageModalOverlay.style.display = 'flex';
         setTimeout(() => { imageModalOverlay.classList.add('visible'); }, 20);
     }
-
-    function hideImageModal() {
+    function hideImageModal() { /* ... (no changes) ... */
         const imageModalOverlay = document.getElementById('imageModalOverlay');
-        const fullImageDisplay = document.getElementById('fullImageDisplay'); // To clear src
-        console.log("hideImageModal called");
-
-        if (!imageModalOverlay) {
-            console.error("imageModalOverlay element not found IN hideImageModal!");
-            return;
-        }
-
+        const fullImageDisplay = document.getElementById('fullImageDisplay');
+        if (!imageModalOverlay) { console.error("CRITICAL: imageModalOverlay element NOT FOUND at the moment of call!"); return; }
         imageModalOverlay.classList.remove('visible');
         setTimeout(() => {
             if (!imageModalOverlay.classList.contains('visible')) {
@@ -330,24 +292,85 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 300);
     }
+    const imageModalOverlayGlobal = document.getElementById('imageModalOverlay');
+    const closeImageModalBtnGlobal = document.getElementById('closeImageModalBtn');
+    if (closeImageModalBtnGlobal) closeImageModalBtnGlobal.addEventListener('click', hideImageModal);
+    if (imageModalOverlayGlobal) imageModalOverlayGlobal.addEventListener('click', function(event) { if (event.target === imageModalOverlayGlobal) hideImageModal(); });
 
-    // Setup event listeners for image modal - ensuring elements exist when listeners are attached
-    const imageModalOverlayGlobal = document.getElementById('imageModalOverlay'); // For overlay click
-    const closeImageModalBtnGlobal = document.getElementById('closeImageModalBtn'); // For close button click
-
-    if (closeImageModalBtnGlobal) {
-        closeImageModalBtnGlobal.addEventListener('click', hideImageModal);
+    // --- Close Trade Modal Logic ---
+    function showCloseTradeModal(tradeId) {
+        if (!closeTradeModalOverlay || !closeTradeIdField || !closingDateInput || !actualPlInput || !closingNotesInput) {
+            console.error("Elementos del modal de cierre no encontrados.");
+            showPopup("Error", "No se pudo abrir el formulario de cierre.", "error");
+            return;
+        }
+        closeTradeIdField.value = tradeId;
+        // Set closing date to today by default and initialize/update flatpickr
+        const today = new Date().toISOString().slice(0,10);
+        if (closingDateInput._flatpickr) {
+            closingDateInput._flatpickr.setDate(today, true);
+        } else {
+            closingDateInput.value = today;
+            initializeDatepicker(closingDateInput); // Initialize if not already
+        }
+        actualPlInput.value = '';
+        closingNotesInput.value = '';
+        closeTradeModalOverlay.style.display = 'flex';
+        setTimeout(() => { closeTradeModalOverlay.classList.add('visible'); }, 20);
     }
-    if (imageModalOverlayGlobal) {
-        imageModalOverlayGlobal.addEventListener('click', function(event) {
-            if (event.target === imageModalOverlayGlobal) { // Check against the fetched global var
-                hideImageModal();
+
+    function hideCloseTradeModal() {
+        if (!closeTradeModalOverlay) return;
+        closeTradeModalOverlay.classList.remove('visible');
+        setTimeout(() => {
+            if (!closeTradeModalOverlay.classList.contains('visible')) {
+                closeTradeModalOverlay.style.display = 'none';
             }
+        }, 300);
+    }
+
+    if (closeCloseTradeModalBtn) closeCloseTradeModalBtn.addEventListener('click', hideCloseTradeModal);
+    if (closeTradeModalOverlay) closeTradeModalOverlay.addEventListener('click', function(event) { if (event.target === closeTradeModalOverlay) hideCloseTradeModal(); });
+
+    if (closeTradeForm) {
+        closeTradeForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const tradeId = closeTradeIdField.value;
+            const payload = {
+                actual_pl: actualPlInput.value,
+                closing_date_str: closingDateInput.value, // Flatpickr ensures YYYY-MM-DD
+                closing_notes: closingNotesInput.value
+            };
+
+            if (payload.actual_pl === '' || isNaN(parseFloat(payload.actual_pl))) {
+                showPopup("Error de Validación", "Por favor, ingrese un P/L Real válido.", "error");
+                return;
+            }
+
+            fetch(`/api/trade/${tradeId}/close`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showPopup('¡Éxito!', data.message || 'Operación cerrada correctamente.', 'success');
+                    hideCloseTradeModal();
+                    fetchAndDisplayStrategies();
+                } else {
+                    showPopup('Error', data.message || 'No se pudo cerrar la operación.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error closing trade:', error);
+                showPopup('Error de Red', 'No se pudo conectar con el servidor.', 'error');
+            });
         });
     }
 
     // --- Displaying Saved Strategies & Sidebar ---
-    function populateExpirationNav(strategies) {
+    function populateExpirationNav(strategies) { /* ... (no changes) ... */
         if (!expirationNav) return;
         expirationNav.innerHTML = '';
         const expirationDates = [...new Set(strategies.map(s => s.primary_expiration_date_str ? s.primary_expiration_date_str.substring(0, 7) : 'Sin Vencimiento'))];
@@ -357,7 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         const allLink = document.createElement('a');
         allLink.href = '#'; allLink.textContent = 'Mostrar Todas'; allLink.classList.add('expiration-link', 'active');
-        allLink.addEventListener('click', (e) => { /* ... */ }); // Simplified for brevity, existing logic is fine
         allLink.addEventListener('click', (e) => {
             e.preventDefault();
             document.querySelectorAll('#expiration-nav .expiration-link.active').forEach(el => el.classList.remove('active'));
@@ -365,7 +387,6 @@ document.addEventListener('DOMContentLoaded', function() {
             renderStrategies(allFetchedStrategies);
         });
         expirationNav.appendChild(allLink);
-        expirationDates.forEach(dateStr => { /* ... */ }); // Simplified for brevity
          expirationDates.forEach(dateStr => {
             const link = document.createElement('a');
             link.href = '#'; link.classList.add('expiration-link');
@@ -382,57 +403,90 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function renderStrategies(strategiesToRender, currentFilterDate = null) {
+    function renderStrategies(strategiesToRender, currentFilterDate = null) { /* ... (modified in previous step to add close button/status) ... */
         savedStrategiesContainer.innerHTML = '';
         if (!strategiesToRender || strategiesToRender.length === 0) {
             savedStrategiesContainer.innerHTML = `<p>No hay estrategias para mostrar${(currentFilterDate && currentFilterDate !== 'Mostrar Todas' ? ` para ${new Date(currentFilterDate + '-01').toLocaleDateString('es-ES',{month:'long', year:'numeric'})}` : '.')}</p>`;
             return;
         }
-        const strategiesByMonth = strategiesToRender.reduce((acc, strategy) => { /* ... */ return acc; }, {}); // Simplified
-        strategiesToRender.forEach(strategy => { // Simplified: Render directly without month grouping for this overwrite
-            const card = document.createElement('div');
-            card.classList.add('strategy-card');
-            // ... (card innerHTML generation from previous steps, ensure image links are updated)
-            // Ensure image thumbnail part is:
-            // ${(strategy.images && strategy.images.length > 0) ? strategy.images.map(img =>
-            //     `<img src="${img.url}" alt="${img.filename}" class="strategy-image-thumbnail" data-fullimage-url="${img.url}" width="100">`
-            // ).join('') : 'N/A'}
-            const entryDateLocale = strategy.entry_date ? new Date(strategy.entry_date).toLocaleString('es-ES') : 'N/A';
-            const maxRiskDisplay = strategy.max_risk !== null && strategy.max_risk !== undefined ? Number(strategy.max_risk).toFixed(2) : 'N/A';
-            const maxProfitDisplay = strategy.max_profit !== null && strategy.max_profit !== undefined ? Number(strategy.max_profit).toFixed(2) : 'N/A';
-            card.innerHTML = `
-                <h4>${strategy.ticker || 'N/A'} - ${strategy.detected_strategy || 'N/A'}</h4>
-                <p><strong>Fecha Entrada:</strong> ${entryDateLocale}</p>
-                <p><strong>Riesgo Máx:</strong> ${maxRiskDisplay}</p>
-                <p><strong>Beneficio Máx:</strong> ${maxProfitDisplay}</p>
-                <div class="card-actions">
-                    <button class="view-details-btn">Ver Detalles</button>
-                    <button class="edit-strategy-btn" data-trade-id="${strategy.id}">Editar</button>
-                    <button class="delete-strategy-btn" data-trade-id="${strategy.id}">Eliminar</button>
-                </div>
-                <div class="strategy-details">
-                    <h5>Detalle de Legs:</h5>
-                    <table class="legs-table"><thead><tr><th>Acción</th><th>Cant.</th><th>Tipo</th><th>Vencimiento</th><th>Strike</th><th>Prima</th></tr></thead>
-                    <tbody>${strategy.legs.map(leg => `<tr><td>${leg.action}</td><td>${leg.quantity}</td><td>${leg.option_type}</td><td>${leg.expiration_date ? new Date(leg.expiration_date).toLocaleDateString('es-ES') : 'N/A'}</td><td>${leg.strike}</td><td>${Number(leg.premium).toFixed(2)}</td></tr>`).join('')}</tbody>
-                    </table>
-                    <h5>Notas:</h5><p>${strategy.notes || 'N/A'}</p>
-                    <h5>Imágenes:</h5><div class="strategy-images">${(strategy.images && strategy.images.length > 0) ? strategy.images.map(img => `<img src="${img.url}" alt="${img.filename}" class="strategy-image-thumbnail" data-fullimage-url="${img.url}" width="100" style="cursor:pointer;">`).join('') : 'N/A'}</div>
-                </div>`;
-            savedStrategiesContainer.appendChild(card);
-            const detailsBtn = card.querySelector('.view-details-btn');
-            if(detailsBtn) { /* ... existing details toggle logic ... */
-                detailsBtn.addEventListener('click', function() {
-                    const detailsDiv = card.querySelector('.strategy-details');
-                    if (detailsDiv) {
-                        detailsDiv.classList.toggle('expanded');
-                        this.textContent = detailsDiv.classList.contains('expanded') ? 'Ocultar Detalles' : 'Ver Detalles';
-                    }
-                });
+
+        const groupedByMonth = strategiesToRender.reduce((acc, strategy) => {
+            let monthYear = 'Sin Vencimiento Asignado';
+            if (strategy.primary_expiration_date_str) monthYear = strategy.primary_expiration_date_str.substring(0, 7);
+            if (!acc[monthYear]) acc[monthYear] = [];
+            acc[monthYear].push(strategy);
+            return acc;
+        }, {});
+
+        const sortedMonths = Object.keys(groupedByMonth).sort((a,b) => {
+            if(a === 'Sin Vencimiento Asignado') return 1;
+            if(b === 'Sin Vencimiento Asignado') return -1;
+            return new Date(a + '-01') - new Date(b + '-01');
+        });
+
+        sortedMonths.forEach(monthYear => {
+            const monthDiv = document.createElement('div');
+            monthDiv.classList.add('expiration-month-group');
+            const monthHeader = document.createElement('h3');
+            let headerText = monthYear;
+             if (monthYear !== 'Sin Vencimiento Asignado') {
+                try { headerText = new Date(monthYear + '-01').toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }); } catch (e) { /* use raw monthYear */ }
             }
+            monthHeader.textContent = headerText;
+            monthDiv.appendChild(monthHeader);
+
+            groupedByMonth[monthYear].forEach(strategy => {
+                const card = document.createElement('div');
+                card.classList.add('strategy-card');
+                const entryDateLocale = strategy.entry_date ? new Date(strategy.entry_date).toLocaleString('es-ES') : 'N/A';
+                const maxRiskDisplay = strategy.max_risk !== null && strategy.max_risk !== undefined ? Number(strategy.max_risk).toFixed(2) : 'N/A';
+                const maxProfitDisplay = strategy.max_profit !== null && strategy.max_profit !== undefined ? Number(strategy.max_profit).toFixed(2) : 'N/A';
+                const actualPlDisplay = strategy.actual_pl !== null && strategy.actual_pl !== undefined ? Number(strategy.actual_pl).toFixed(2) : 'N/A';
+                const closingDateDisplay = strategy.closing_date ? new Date(strategy.closing_date).toLocaleDateString('es-ES') : 'N/A';
+                let statusBadge = `<span class="status-badge status-${strategy.status ? strategy.status.toLowerCase() : 'abierta'}">${strategy.status || 'Abierta'}</span>`;
+
+                card.innerHTML = `
+                    <h4>${strategy.ticker || 'N/A'} - ${strategy.detected_strategy || 'N/A'} ${statusBadge}</h4>
+                    <p><strong>Fecha Entrada:</strong> ${entryDateLocale}</p>
+                    ${strategy.status === 'Cerrada' ? `
+                        <p><strong>P/L Real:</strong> <span class="pl-value ${Number(strategy.actual_pl) >= 0 ? 'profit' : 'loss'}">${actualPlDisplay}</span></p>
+                        <p><strong>Fecha Cierre:</strong> ${closingDateDisplay}</p>
+                        ${strategy.closing_notes ? `<p><strong>Notas Cierre:</strong> ${strategy.closing_notes}</p>` : ''}
+                    ` : `
+                        <p><strong>Riesgo Máx:</strong> ${maxRiskDisplay}</p>
+                        <p><strong>Beneficio Máx:</strong> ${maxProfitDisplay}</p>
+                    `}
+                    <div class="card-actions">
+                        <button class="view-details-btn">Ver Detalles</button>
+                        ${strategy.status !== 'Cerrada' ? `<button class="edit-strategy-btn" data-trade-id="${strategy.id}">Editar</button>` : ''}
+                        ${strategy.status !== 'Cerrada' ? `<button class="close-trade-btn" data-trade-id="${strategy.id}">Registrar Cierre</button>` : ''}
+                        <button class="delete-strategy-btn" data-trade-id="${strategy.id}">Eliminar</button>
+                    </div>
+                    <div class="strategy-details">
+                        <h5>Detalle de Legs:</h5>
+                        <table class="legs-table"><thead><tr><th>Acción</th><th>Cant.</th><th>Tipo</th><th>Vencimiento</th><th>Strike</th><th>Prima</th></tr></thead>
+                        <tbody>${strategy.legs.map(leg => `<tr><td>${leg.action}</td><td>${leg.quantity}</td><td>${leg.option_type}</td><td>${leg.expiration_date ? new Date(leg.expiration_date).toLocaleDateString('es-ES') : 'N/A'}</td><td>${leg.strike}</td><td>${Number(leg.premium).toFixed(2)}</td></tr>`).join('')}</tbody>
+                        </table>
+                        <h5>Notas:</h5><p>${strategy.notes || 'N/A'}</p>
+                        <h5>Imágenes:</h5><div class="strategy-images">${(strategy.images && strategy.images.length > 0) ? strategy.images.map(img => `<img src="${img.url}" alt="${img.filename}" class="strategy-image-thumbnail" data-fullimage-url="${img.url}" width="100" style="cursor:pointer;">`).join('') : 'N/A'}</div>
+                    </div>`;
+                monthDiv.appendChild(card);
+                const detailsBtn = card.querySelector('.view-details-btn');
+                if(detailsBtn) {
+                    detailsBtn.addEventListener('click', function() {
+                        const detailsDiv = card.querySelector('.strategy-details');
+                        if (detailsDiv) {
+                            detailsDiv.classList.toggle('expanded');
+                            this.textContent = detailsDiv.classList.contains('expanded') ? 'Ocultar Detalles' : 'Ver Detalles';
+                        }
+                    });
+                }
+            });
+            if (groupedByMonth[monthYear].length > 0) savedStrategiesContainer.appendChild(monthDiv);
         });
     }
 
-    function fetchAndDisplayStrategies() {
+    function fetchAndDisplayStrategies() { /* ... (no changes) ... */
         fetch('/api/get_strategies')
             .then(response => response.json())
             .then(data => {
@@ -457,14 +511,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Initial Load and Event Listeners for Edit/Delete/Image Click using event delegation
     fetchAndDisplayStrategies();
 
     if (savedStrategiesContainer) {
         savedStrategiesContainer.addEventListener('click', function(event) {
             const target = event.target;
-            console.log("Clicked target:", target); // DEBUG
-
             if (target.classList.contains('edit-strategy-btn')) {
                 const tradeId = target.dataset.tradeId;
                 populateFormForEdit(tradeId);
@@ -484,14 +535,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     .catch(error => showPopup('Error de Red', 'No se pudo conectar.', 'error'));
                 }
             } else if (target.classList.contains('strategy-image-thumbnail')) {
-                console.log("Thumbnail clicked. Target:", target); // DEBUG
                 const fullImageUrl = target.getAttribute('data-fullimage-url');
-                console.log("Full image URL from getAttribute:", fullImageUrl); // DEBUG
-                if (fullImageUrl) {
-                    showImageModal(fullImageUrl);
-                } else {
-                    console.error("data-fullimage-url attribute is missing or empty."); // DEBUG
-                }
+                if (fullImageUrl) showImageModal(fullImageUrl);
+                else console.error("data-fullimage-url attribute is missing or empty.");
+            } else if (target.classList.contains('close-trade-btn')) {
+                const tradeId = target.dataset.tradeId;
+                showCloseTradeModal(tradeId);
             }
         });
     }
