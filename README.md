@@ -19,6 +19,7 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
         - **Creación:** Entrada detallada de operaciones multi-leg.
         - **Edición:** Permite modificar todos los aspectos de una operación guardada (incluyendo legs e imágenes).
         - **Eliminación:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
+    - **Visualización de Imágenes Mejorada:** Las imágenes adjuntas se muestran en un modal (pop-up) dentro de la página en lugar de abrir en una nueva pestaña.
     - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con animaciones de carga.
 
 
