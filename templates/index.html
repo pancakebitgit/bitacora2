@@ -23,76 +23,74 @@
                 <h1>Bitácora de Estrategias de Opciones</h1>
                 <form id="strategyForm">
                     <input type="hidden" id="editingTradeIdField" name="tradeId">
-                    <!-- ... (contenido del formulario existente sin cambios) ... -->
-            <h2>Información General de la Operación</h2>
-            <div>
-                <label for="ticker">Activo Subyacente (Ticker):</label>
-                <input type="text" id="ticker" name="ticker" required>
-            </div>
-            <div>
-                <label for="entryDate">Fecha de Entrada:</label>
-                <input type="text" id="entryDate" name="entryDate" readonly>
-            </div>
-            <div>
-                <label for="marketVision">Visión del Mercado / Justificación:</label>
-                <textarea id="marketVision" name="marketVision" rows="4"></textarea>
-            </div>
+                    <h2>Información General de la Operación</h2>
+                    <div>
+                        <label for="ticker">Activo Subyacente (Ticker):</label>
+                        <input type="text" id="ticker" name="ticker" required>
+                    </div>
+                    <div>
+                        <label for="entryDate">Fecha de Entrada:</label>
+                        <input type="text" id="entryDate" name="entryDate" readonly>
+                    </div>
+                    <div>
+                        <label for="marketVision">Visión del Mercado / Justificación:</label>
+                        <textarea id="marketVision" name="marketVision" rows="4"></textarea>
+                    </div>
 
-            <h2>Constructor de Legs</h2>
-            <div id="legsContainer">
-                <!-- Leg 0: Initial leg row -->
-                <div class="leg-row" id="leg-0">
-                    <h3>Leg 1</h3>
-                    <div>
-                        <label>Acción:</label> <!-- No 'for' needed for button group label -->
-                        <button type="button" class="action-btn buy" data-action="BUY">COMPRA (Buy to Open)</button>
-                        <button type="button" class="action-btn sell" data-action="SELL">VENTA (Sell to Open)</button>
-                        <input type="hidden" id="leg_0_action" name="legs[0][action]" class="leg-action-input" required>
+                    <h2>Constructor de Legs</h2>
+                    <div id="legsContainer">
+                        <!-- Leg 0: Initial leg row -->
+                        <div class="leg-row" id="leg-0">
+                            <h3>Leg 1</h3>
+                            <div>
+                                <label>Acción:</label>
+                                <button type="button" class="action-btn buy" data-action="BUY">COMPRA (Buy to Open)</button>
+                                <button type="button" class="action-btn sell" data-action="SELL">VENTA (Sell to Open)</button>
+                                <input type="hidden" id="leg_0_action" name="legs[0][action]" class="leg-action-input" required>
+                            </div>
+                            <div>
+                                <label for="leg_0_quantity">Cantidad:</label>
+                                <input type="number" id="leg_0_quantity" name="legs[0][quantity]" min="1" value="1" required>
+                            </div>
+                            <div>
+                                <label>Tipo:</label>
+                                <button type="button" class="option-type-btn call" data-type="CALL">CALL</button>
+                                <button type="button" class="option-type-btn put" data-type="PUT">PUT</button>
+                                <input type="hidden" id="leg_0_option_type" name="legs[0][option_type]" class="leg-option-type-input" required>
+                            </div>
+                            <div>
+                                <label for="leg_0_expirationDate">Fecha de Vencimiento:</label>
+                                <input type="date" id="leg_0_expirationDate" name="legs[0][expirationDate]" required>
+                            </div>
+                            <div>
+                                <label for="leg_0_strike">Strike:</label>
+                                <input type="number" step="any" id="leg_0_strike" name="legs[0][strike]" required>
+                            </div>
+                            <div>
+                                <label for="leg_0_premium">Prima (por contrato):</label>
+                                <input type="number" step="any" id="leg_0_premium" name="legs[0][premium]" required>
+                            </div>
+                            <button type="button" class="remove-leg-btn" style="display:none;">Eliminar Leg</button>
+                        </div>
                     </div>
+                    <button type="button" id="addLegBtn">+ Añadir Leg</button>
+
+                    <h2>Sección Final</h2>
                     <div>
-                        <label for="leg_0_quantity">Cantidad:</label>
-                        <input type="number" id="leg_0_quantity" name="legs[0][quantity]" min="1" value="1" required>
+                        <label for="images">Carga de Imágenes (opcional):</label>
+                        <input type="file" id="images" name="images[]" multiple accept="image/*">
                     </div>
-                    <div>
-                        <label>Tipo:</label> <!-- No 'for' needed for button group label -->
-                        <button type="button" class="option-type-btn call" data-type="CALL">CALL</button>
-                        <button type="button" class="option-type-btn put" data-type="PUT">PUT</button>
-                        <input type="hidden" id="leg_0_option_type" name="legs[0][option_type]" class="leg-option-type-input" required>
-                    </div>
-                    <div>
-                        <label for="leg_0_expirationDate">Fecha de Vencimiento:</label>
-                        <input type="date" id="leg_0_expirationDate" name="legs[0][expirationDate]" required>
-                    </div>
-                    <div>
-                        <label for="leg_0_strike">Strike:</label>
-                        <input type="number" step="any" id="leg_0_strike" name="legs[0][strike]" required>
-                    </div>
-                    <div>
-                        <label for="leg_0_premium">Prima (por contrato):</label>
-                        <input type="number" step="any" id="leg_0_premium" name="legs[0][premium]" required>
-                    </div>
-                    <button type="button" class="remove-leg-btn" style="display:none;">Eliminar Leg</button>
+
+                    <button type="submit" id="saveStrategyBtn">Guardar Estrategia</button>
+                </form>
+
+                <hr>
+                <h2>Estrategias Guardadas</h2>
+                <div id="savedStrategiesContainer">
+                    <p>Aún no hay estrategias guardadas.</p>
                 </div>
-            </div>
-            <button type="button" id="addLegBtn">+ Añadir Leg</button>
-
-            <h2>Sección Final</h2>
-            <div>
-                <label for="images">Carga de Imágenes (opcional):</label>
-                <input type="file" id="images" name="images[]" multiple accept="image/*">
-            </div>
-
-            <button type="submit" id="saveStrategyBtn">Guardar Estrategia</button>
-        </form>
-
-        <hr>
-        <h2>Estrategias Guardadas</h2>
-        <div id="savedStrategiesContainer">
-            <!-- Las estrategias guardadas se cargarán aquí -->
-            <p>Aún no hay estrategias guardadas.</p>
-        </div>
-    </div> <!-- Cierre de .form-container -->
-    </main> <!-- Cierre de .main-content -->
+            </div> <!-- Cierre de .form-container -->
+        </main> <!-- Cierre de .main-content -->
     </div> <!-- Cierre de .app-container -->
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -101,20 +99,23 @@
     <!-- Pop-up Modal Structure -->
     <div id="popupModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <span class.bind="close-btn" id="closePopupBtn">&times;</span>
+            <span id="closePopupBtn" class="close-btn">&times;</span> <!-- Corregido class.bind -->
             <div id="popupIcon" class="popup-icon">
-                <!-- Icon will be set by JS, e.g., a checkmark or an X -->
+                <!-- Icon will be set by JS -->
             </div>
             <h3 id="popupTitle"></h3>
             <p id="popupMessage"></p>
             <div class="popup-sparkles">
-                <!-- Sparkles will be animated with CSS -->
-                <div class="sparkle s1"></div>
-                <div class="sparkle s2"></div>
-                <div class="sparkle s3"></div>
-                <div class="sparkle s4"></div>
-                <div class="sparkle s5"></div>
+                <div class="sparkle s1"></div><div class="sparkle s2"></div><div class="sparkle s3"></div><div class="sparkle s4"></div><div class="sparkle s5"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Image Modal Structure -->
+    <div id="imageModalOverlay" class="modal-overlay" style="display: none;">
+        <div class="image-modal-content">
+            <span id="closeImageModalBtn" class="close-btn">&times;</span>
+            <img id="fullImageDisplay" src="" alt="Imagen Ampliada" />
         </div>
     </div>
 </body>
