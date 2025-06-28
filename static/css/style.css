@@ -345,6 +345,25 @@ button[type="submit"]:hover, #addLegBtn:hover {
     background-color: #5a5a5e;
 }
 
+.card-actions {
+    margin-top: 15px;
+    display: flex; /* Align buttons in a row */
+    gap: 10px; /* Space between buttons */
+}
+
+.delete-strategy-btn {
+    background-color: #dc3545; /* Red for delete/danger */
+    color: white;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border: 1px solid #c82333;
+    /* Inherits general button styles for shadow, radius, transition */
+}
+.delete-strategy-btn:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
 .strategy-details {
     margin-top: 15px;
     padding-top: 15px;
