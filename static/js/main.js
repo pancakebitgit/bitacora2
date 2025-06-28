@@ -264,16 +264,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Image Modal Logic ---
     function showImageModal(imageUrl) {
+        console.log("--- Attempting to show image modal ---"); // Specific log
+        console.log("Searching for ID: 'imageModalOverlay'"); // Specific log
         const imageModalOverlay = document.getElementById('imageModalOverlay');
+        console.log("Element found for 'imageModalOverlay':", imageModalOverlay); // Specific log
+
+        console.log("Searching for ID: 'fullImageDisplay'"); // Specific log
         const fullImageDisplay = document.getElementById('fullImageDisplay');
-        console.log("showImageModal called with URL:", imageUrl);
+        console.log("Element found for 'fullImageDisplay':", fullImageDisplay); // Specific log
+
+        // The original console.log for the URL can remain if desired, or be removed if too verbose
+        // console.log("showImageModal called with URL:", imageUrl);
 
         if (!imageModalOverlay) {
-            console.error("imageModalOverlay element not found IN showImageModal!");
+            console.error("CRITICAL: imageModalOverlay element NOT FOUND at the moment of call!");
             return;
         }
         if (!fullImageDisplay) {
-            console.error("fullImageDisplay element not found IN showImageModal!");
+            console.error("CRITICAL: fullImageDisplay element NOT FOUND at the moment of call!");
             return;
         }
 
