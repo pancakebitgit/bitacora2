@@ -519,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     `}
                     <div class="card-actions">
                         <button class="view-details-btn">Ver Detalles</button>
-                        <button class="edit-strategy-btn" data-trade-id="${strategy.id}">Editar</button> {/* Editar siempre visible */}
+                        <button class="edit-strategy-btn" data-trade-id="${strategy.id}">Editar</button>
                         ${strategy.status !== 'Cerrada' ? `<button class="close-trade-btn" data-trade-id="${strategy.id}">Registrar Cierre</button>` : ''}
                         <button class="delete-strategy-btn" data-trade-id="${strategy.id}">Eliminar</button>
                     </div>
