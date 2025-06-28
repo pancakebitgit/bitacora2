@@ -10,12 +10,12 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
 - **Almacenamiento de Datos:** Guarda las operaciones, incluyendo detalles de cada leg y notas del usuario.
 - **Carga de Imágenes:** Permite adjuntar imágenes (gráficos, perfiles de riesgo) a cada operación.
 - **Visualización Mejorada:**
-    - **Tema Oscuro Moderno:** Interfaz con un diseño profesional oscuro, con efectos de relieve.
-    - **Panel Lateral de Navegación:** Permite filtrar estrategias por mes de vencimiento.
+    - **Tema Oscuro Moderno y Dinámico:** Interfaz con un diseño profesional oscuro, efectos de relieve, colores neón sutiles en elementos clave y animaciones para una experiencia más fluida.
+    - **Panel Lateral de Navegación:** Permite filtrar estrategias por mes de vencimiento con retroalimentación visual mejorada.
     - **Vista Detallada Interactiva:** Detalles de estrategias expandibles con transiciones suaves.
-    - **Calendario Personalizado:** Selector de fecha de vencimiento mejorado y temático.
-    - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones.
-    - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento.
+    - **Calendario Personalizado:** Selector de fecha de vencimiento mejorado y temático (Flatpickr).
+    - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones (incluyendo "destellos" para éxito).
+    - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con animaciones de carga.
 
 
 ## Tecnologías Utilizadas

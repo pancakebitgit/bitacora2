@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p><strong>Riesgo Máx:</strong> ${maxRiskDisplay}</p>
                     <p><strong>Beneficio Máx:</strong> ${maxProfitDisplay}</p>
                     <button class="view-details-btn">Ver Detalles</button>
-                    <div class="strategy-details"> {/* REMOVED style="display:none;" */}
+                    <div class="strategy-details">
                         <h5>Detalle de Legs:</h5>
                         <table class="legs-table">
                             <thead>
