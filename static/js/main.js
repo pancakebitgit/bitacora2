@@ -21,10 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const popupTitleEl = document.getElementById('popupTitle');
     const popupMessageEl = document.getElementById('popupMessage');
 
-    // Image Modal elements
-    const imageModalOverlay = document.getElementById('imageModalOverlay');
-    const closeImageModalBtn = document.getElementById('closeImageModalBtn');
-    const fullImageDisplay = document.getElementById('fullImageDisplay');
+    // Image Modal elements are now fetched inside their respective functions
+    // to ensure DOM availability.
+    // const imageModalOverlay = document.getElementById('imageModalOverlay'); // Moved
+    // const closeImageModalBtn = document.getElementById('closeImageModalBtn'); // Moved
+    // const fullImageDisplay = document.getElementById('fullImageDisplay'); // Moved
 
 
     // --- Initialization ---
@@ -263,35 +264,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Image Modal Logic ---
     function showImageModal(imageUrl) {
-        console.log("showImageModal called with URL:", imageUrl); // DEBUG
+        const imageModalOverlay = document.getElementById('imageModalOverlay');
+        const fullImageDisplay = document.getElementById('fullImageDisplay');
+        console.log("showImageModal called with URL:", imageUrl);
+
         if (!imageModalOverlay) {
-            console.error("imageModalOverlay element not found!"); // DEBUG
+            console.error("imageModalOverlay element not found IN showImageModal!");
             return;
         }
         if (!fullImageDisplay) {
-            console.error("fullImageDisplay element not found!"); // DEBUG
+            console.error("fullImageDisplay element not found IN showImageModal!");
             return;
         }
+
         fullImageDisplay.src = imageUrl;
         imageModalOverlay.style.display = 'flex';
         setTimeout(() => { imageModalOverlay.classList.add('visible'); }, 20);
     }
+
     function hideImageModal() {
-        console.log("hideImageModal called"); // DEBUG
+        const imageModalOverlay = document.getElementById('imageModalOverlay');
+        const fullImageDisplay = document.getElementById('fullImageDisplay'); // To clear src
+        console.log("hideImageModal called");
+
         if (!imageModalOverlay) {
-            console.error("imageModalOverlay element not found on hide!"); // DEBUG
+            console.error("imageModalOverlay element not found IN hideImageModal!");
             return;
         }
+
         imageModalOverlay.classList.remove('visible');
         setTimeout(() => {
             if (!imageModalOverlay.classList.contains('visible')) {
                 imageModalOverlay.style.display = 'none';
-                if(fullImageDisplay) fullImageDisplay.src = ''; // Clear image src
+                if(fullImageDisplay) fullImageDisplay.src = '';
             }
         }, 300);
     }
-    if (closeImageModalBtn) closeImageModalBtn.addEventListener('click', hideImageModal);
-    if (imageModalOverlay) imageModalOverlay.addEventListener('click', function(event) { if (event.target === imageModalOverlay) hideImageModal(); });
+
+    // Setup event listeners for image modal - ensuring elements exist when listeners are attached
+    const imageModalOverlayGlobal = document.getElementById('imageModalOverlay'); // For overlay click
+    const closeImageModalBtnGlobal = document.getElementById('closeImageModalBtn'); // For close button click
+
+    if (closeImageModalBtnGlobal) {
+        closeImageModalBtnGlobal.addEventListener('click', hideImageModal);
+    }
+    if (imageModalOverlayGlobal) {
+        imageModalOverlayGlobal.addEventListener('click', function(event) {
+            if (event.target === imageModalOverlayGlobal) { // Check against the fetched global var
+                hideImageModal();
+            }
+        });
+    }
 
     // --- Displaying Saved Strategies & Sidebar ---
     function populateExpirationNav(strategies) {
