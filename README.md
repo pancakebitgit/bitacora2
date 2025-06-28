@@ -15,7 +15,10 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
     - **Vista Detallada Interactiva:** Detalles de estrategias expandibles con transiciones suaves.
     - **Calendario Personalizado:** Selector de fecha de vencimiento mejorado y temático (Flatpickr).
     - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones (incluyendo "destellos" para éxito).
-    - **Eliminación de Operaciones:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
+    - **Gestión de Operaciones:**
+        - **Creación:** Entrada detallada de operaciones multi-leg.
+        - **Edición:** Permite modificar todos los aspectos de una operación guardada (incluyendo legs e imágenes).
+        - **Eliminación:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
     - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con animaciones de carga.
 
 
