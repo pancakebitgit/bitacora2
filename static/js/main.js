@@ -263,13 +263,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Image Modal Logic ---
     function showImageModal(imageUrl) {
-        if (!imageModalOverlay || !fullImageDisplay) return;
+        console.log("showImageModal called with URL:", imageUrl); // DEBUG
+        if (!imageModalOverlay) {
+            console.error("imageModalOverlay element not found!"); // DEBUG
+            return;
+        }
+        if (!fullImageDisplay) {
+            console.error("fullImageDisplay element not found!"); // DEBUG
+            return;
+        }
         fullImageDisplay.src = imageUrl;
         imageModalOverlay.style.display = 'flex';
         setTimeout(() => { imageModalOverlay.classList.add('visible'); }, 20);
     }
     function hideImageModal() {
-        if (!imageModalOverlay) return;
+        console.log("hideImageModal called"); // DEBUG
+        if (!imageModalOverlay) {
+            console.error("imageModalOverlay element not found on hide!"); // DEBUG
+            return;
+        }
         imageModalOverlay.classList.remove('visible');
         setTimeout(() => {
             if (!imageModalOverlay.classList.contains('visible')) {
@@ -398,6 +410,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (savedStrategiesContainer) {
         savedStrategiesContainer.addEventListener('click', function(event) {
             const target = event.target;
+            console.log("Clicked target:", target); // DEBUG
+
             if (target.classList.contains('edit-strategy-btn')) {
                 const tradeId = target.dataset.tradeId;
                 populateFormForEdit(tradeId);
@@ -417,9 +431,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     .catch(error => showPopup('Error de Red', 'No se pudo conectar.', 'error'));
                 }
             } else if (target.classList.contains('strategy-image-thumbnail')) {
-                const fullImageUrl = target.dataset.fullimageUrl;
+                console.log("Thumbnail clicked. Target:", target); // DEBUG
+                const fullImageUrl = target.getAttribute('data-fullimage-url');
+                console.log("Full image URL from getAttribute:", fullImageUrl); // DEBUG
                 if (fullImageUrl) {
                     showImageModal(fullImageUrl);
+                } else {
+                    console.error("data-fullimage-url attribute is missing or empty."); // DEBUG
                 }
             }
         });
