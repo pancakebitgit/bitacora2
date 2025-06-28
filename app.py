@@ -392,8 +392,58 @@ def update_strategy(trade_id):
                 return jsonify(success=False, message="Formato de Fecha de Entrada inválido para actualizar."), 400
         trade_to_update.notes = data.get('marketVision', trade_to_update.notes)
 
+        # Actualizar estado y campos de cierre
+        new_status = data.get('status')
+        if new_status:
+            if new_status == 'Abierta':
+                trade_to_update.status = 'Abierta'
+                trade_to_update.actual_pl = None
+                trade_to_update.closing_date = None
+                trade_to_update.closing_notes = None
+            elif new_status == 'Cerrada':
+                trade_to_update.status = 'Cerrada'
+                actual_pl_str = data.get('actual_pl')
+                closing_date_str = data.get('closing_date_str') # Expecting YYYY-MM-DD
+                closing_notes_val = data.get('closing_notes', trade_to_update.closing_notes) # Keep old if not provided
+
+                if actual_pl_str is None or actual_pl_str == '': # P/L es obligatorio para cerrar
+                    return jsonify(success=False, message="El P/L real es obligatorio si se establece el estado a 'Cerrada'."), 400
+                try:
+                    trade_to_update.actual_pl = float(actual_pl_str)
+                except ValueError:
+                    return jsonify(success=False, message="El P/L real debe ser un número."), 400
+
+                if closing_date_str:
+                    try:
+                        trade_to_update.closing_date = datetime.strptime(closing_date_str, '%Y-%m-%d').date()
+                    except ValueError:
+                        return jsonify(success=False, message="Formato de fecha de cierre inválido. Usar YYYY-MM-DD."), 400
+                elif not trade_to_update.closing_date: # Si no se provee y no había una antes, default a hoy
+                    trade_to_update.closing_date = datetime.utcnow().date()
+
+                trade_to_update.closing_notes = closing_notes_val
+            else:
+                return jsonify(success=False, message="Estado no válido."), 400
+        elif trade_to_update.status == 'Cerrada': # Si no se envía status, pero está cerrada, permitir actualizar P/L, fecha, notas
+            if data.get('actual_pl') is not None and data.get('actual_pl') != '':
+                try:
+                    trade_to_update.actual_pl = float(data.get('actual_pl'))
+                except ValueError:
+                    return jsonify(success=False, message="El P/L real debe ser un número."), 400
+            if data.get('closing_date_str'):
+                try:
+                    trade_to_update.closing_date = datetime.strptime(data.get('closing_date_str'), '%Y-%m-%d').date()
+                except ValueError:
+                    return jsonify(success=False, message="Formato de fecha de cierre inválido. Usar YYYY-MM-DD."), 400
+            if data.get('closing_notes') is not None:
+                 trade_to_update.closing_notes = data.get('closing_notes')
+
+
         # Manejo de Legs: Eliminar los antiguos y crear nuevos
-        # Eliminar legs existentes
+        # Solo si se envían nuevos legs, si no, mantener los existentes.
+        # Para saber si se envían nuevos legs, podemos chequear la presencia de 'legs[0][action]'
+        if 'legs[0][action]' in data:
+            # Eliminar legs existentes
         for leg in trade_to_update.legs:
             db.session.delete(leg)
         # db.session.flush() # Asegurar que se eliminan antes de añadir nuevos si hay constraints, o simplemente dejar que el commit lo maneje.
@@ -441,11 +491,22 @@ def update_strategy(trade_id):
         if not new_legs_data: # Debe haber al menos un leg
              return jsonify(success=False, message='La estrategia actualizada debe tener al menos un leg.'), 400
 
-        # Recalcular estrategia y riesgo/beneficio
-        trade_to_update.detected_strategy = recognize_strategy(new_legs_data)
-        risk_profit_profile = calculate_max_risk_profit(trade_to_update.detected_strategy, new_legs_data)
-        trade_to_update.max_risk = risk_profit_profile.get('max_risk')
-        trade_to_update.max_profit = risk_profit_profile.get('max_profit')
+            # Recalcular con los nuevos legs
+            trade_to_update.detected_strategy = recognize_strategy(new_legs_data)
+            risk_profit_profile = calculate_max_risk_profit(trade_to_update.detected_strategy, new_legs_data)
+            trade_to_update.max_risk = risk_profit_profile.get('max_risk')
+            trade_to_update.max_profit = risk_profit_profile.get('max_profit')
+        else:
+            # Si los legs no se modificaron, pero otros campos sí (ej. ticker, notas),
+            # la estrategia detectada y el riesgo/beneficio no deberían cambiar.
+            # No es necesario recalcularlos a menos que los legs sean la fuente de verdad.
+            # Para consistencia, si los legs NO se envían, asumimos que no cambian y los valores de estrategia/riesgo tampoco.
+            # Si se quisiera recalcular siempre, se necesitaría convertir trade_to_update.legs a formato dict:
+            # current_legs_for_calc = [{'action': l.action, ...} for l in trade_to_update.legs]
+            # trade_to_update.detected_strategy = recognize_strategy(current_legs_for_calc)
+            # ... y así sucesivamente. Por ahora, no se recalcula si los legs no se envían.
+            pass
+
 
         # Manejo de Imágenes: Añadir nuevas imágenes, las existentes se mantienen.
         # La eliminación granular de imágenes no se implementa en este paso.

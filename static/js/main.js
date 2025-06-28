@@ -26,14 +26,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeImageModalBtn = document.getElementById('closeImageModalBtn');
     const fullImageDisplay = document.getElementById('fullImageDisplay');
 
-    // Close Trade Modal elements
+    // Close Trade Modal elements (for initial closing action)
     const closeTradeModalOverlay = document.getElementById('closeTradeModalOverlay');
     const closeCloseTradeModalBtn = document.getElementById('closeCloseTradeModalBtn');
     const closeTradeForm = document.getElementById('closeTradeForm');
-    const closeTradeIdField = document.getElementById('closeTradeIdField');
-    const actualPlInput = document.getElementById('actualPlInput');
-    const closingDateInput = document.getElementById('closingDateInput');
-    const closingNotesInput = document.getElementById('closingNotesInput');
+    const closeTradeIdField = document.getElementById('closeTradeIdField'); // Hidden input in closeTradeForm
+    const actualPlInput = document.getElementById('actualPlInput'); // In closeTradeForm
+    const closingDateInput = document.getElementById('closingDateInput'); // In closeTradeForm
+    const closingNotesInput = document.getElementById('closingNotesInput'); // In closeTradeForm
+
+    // Form fields for closing details (within main strategyForm, for editing closed trades)
+    const closingDetailsSection = document.getElementById('closingDetailsSection');
+    const tradeStatusSelect = document.getElementById('trade_status');
+    const formActualPlInput = document.getElementById('form_actual_pl');
+    const formClosingDateInput = document.getElementById('form_closing_date');
+    const formClosingNotesInput = document.getElementById('form_closing_notes');
+    // Divs containing these form inputs
+    const actualPlDiv = document.getElementById('actualPlDiv');
+    const closingDateDiv = document.getElementById('closingDateDiv');
+    const closingNotesDiv = document.getElementById('closingNotesDiv');
 
 
     // --- Initialization ---
@@ -58,17 +69,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Datepicker Initialization ---
     function initializeDatepicker(element, options = {}) {
         if(element && typeof flatpickr === 'function') {
-            const defaultConfig = {
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "d M, Y",
-            };
+            const defaultConfig = { dateFormat: "Y-m-d", altInput: true, altFormat: "d M, Y" };
             flatpickr(element, {...defaultConfig, ...options});
         }
     }
-    // Initialize datepicker for closing date input
-    if (closingDateInput) initializeDatepicker(closingDateInput);
+    if (closingDateInput) initializeDatepicker(closingDateInput); // For the close trade modal
+    if (formClosingDateInput) initializeDatepicker(formClosingDateInput); // For the main form's closing date
 
+    // Event listener for trade status change in the main form
+    if (tradeStatusSelect) {
+        tradeStatusSelect.addEventListener('change', function() {
+            const showClosingFields = this.value === 'Cerrada';
+            if(actualPlDiv) actualPlDiv.style.display = showClosingFields ? 'block' : 'none';
+            if(closingDateDiv) closingDateDiv.style.display = showClosingFields ? 'block' : 'none';
+            if(closingNotesDiv) closingNotesDiv.style.display = showClosingFields ? 'block' : 'none';
+
+            if (showClosingFields && formClosingDateInput && !formClosingDateInput.value) {
+                // Set closing date to today by default if switching to 'Cerrada' and it's empty
+                const today = new Date().toISOString().slice(0,10);
+                if (formClosingDateInput._flatpickr) formClosingDateInput._flatpickr.setDate(today, true);
+                else formClosingDateInput.value = today;
+            }
+        });
+    }
 
     // --- Leg Management ---
     function updateLegNumbers() { /* ... (no changes) ... */
@@ -77,9 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const h3 = legRow.querySelector('h3');
             if(h3) h3.textContent = `Leg ${index + 1}`;
             const removeBtn = legRow.querySelector('.remove-leg-btn');
-            if (removeBtn) {
-                 removeBtn.style.display = legRows.length > 1 ? 'inline-block' : 'none';
-            }
+            if (removeBtn) removeBtn.style.display = legRows.length > 1 ? 'inline-block' : 'none';
         });
     }
     function setupButtonToggle(legRow) { /* ... (no changes) ... */
@@ -135,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addLegBtn) addLegBtn.addEventListener('click', () => addLeg(null));
 
     // --- Form Population for Edit & Reset ---
-    function populateFormForEdit(tradeId) { /* ... (no changes) ... */
+    function populateFormForEdit(tradeId) {
         const trade = allFetchedStrategies.find(s => s.id === parseInt(tradeId));
         if (!trade) {
             showPopup('Error', 'No se encontró la estrategia para editar.', 'error');
@@ -143,6 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         editingTradeId = tradeId;
         if (editingTradeIdField) editingTradeIdField.value = tradeId;
+
         document.getElementById('ticker').value = trade.ticker;
         if (entryDateField) {
             const entryDateVal = trade.entry_date ? trade.entry_date.substring(0, 16) : '';
@@ -150,10 +172,38 @@ document.addEventListener('DOMContentLoaded', function() {
             else entryDateField.value = entryDateVal;
         }
         document.getElementById('marketVision').value = trade.notes || '';
+
+        // Populate closing details section
+        if(closingDetailsSection) closingDetailsSection.style.display = 'block';
+        if(tradeStatusSelect) tradeStatusSelect.value = trade.status || 'Abierta';
+
+        const showClosingFields = (trade.status === 'Cerrada');
+        if(actualPlDiv) actualPlDiv.style.display = showClosingFields ? 'block' : 'none';
+        if(closingDateDiv) closingDateDiv.style.display = showClosingFields ? 'block' : 'none';
+        if(closingNotesDiv) closingNotesDiv.style.display = showClosingFields ? 'block' : 'none';
+
+        if (showClosingFields) {
+            if(formActualPlInput) formActualPlInput.value = trade.actual_pl !== null ? trade.actual_pl : '';
+            if(formClosingDateInput) {
+                if (formClosingDateInput._flatpickr) formClosingDateInput._flatpickr.setDate(trade.closing_date, true);
+                else formClosingDateInput.value = trade.closing_date ? trade.closing_date.slice(0,10) : '';
+            }
+            if(formClosingNotesInput) formClosingNotesInput.value = trade.closing_notes || '';
+        } else { // Clear if Abierta
+             if(formActualPlInput) formActualPlInput.value = '';
+             if(formClosingDateInput) {
+                if (formClosingDateInput._flatpickr) formClosingDateInput._flatpickr.clear();
+                else formClosingDateInput.value = '';
+             }
+             if(formClosingNotesInput) formClosingNotesInput.value = '';
+        }
+
+
         legsContainer.innerHTML = '';
         legCounter = 0;
         trade.legs.forEach((leg, index) => {
             const currentLegRow = addLeg(index);
+            // ... (population of leg fields - no change from before) ...
             const actionInput = currentLegRow.querySelector('.leg-action-input');
             const actionButton = currentLegRow.querySelector(`.action-btn[data-action="${leg.action}"]`);
             if (actionInput) actionInput.value = leg.action;
@@ -173,13 +223,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         legCounter = trade.legs.length;
         if (trade.legs.length === 0) addLeg(0);
+
         if (formSubmitButton) formSubmitButton.textContent = 'Actualizar Estrategia';
         document.getElementById('strategyForm').scrollIntoView({ behavior: 'smooth' });
     }
-    function resetFormToCreateMode() { /* ... (no changes) ... */
+
+    function resetFormToCreateMode() {
         editingTradeId = null;
         if (editingTradeIdField) editingTradeIdField.value = '';
-        if (strategyForm) strategyForm.reset();
+        if (strategyForm) strategyForm.reset(); // Resets native form fields
+
+        if(closingDetailsSection) closingDetailsSection.style.display = 'none'; // Hide closing section
+        if(tradeStatusSelect) tradeStatusSelect.value = 'Abierta'; // Reset status select
+        if(formActualPlInput) formActualPlInput.value = '';
+        if(formClosingDateInput) { // Clear flatpickr for form closing date
+            if (formClosingDateInput._flatpickr) formClosingDateInput._flatpickr.clear();
+            else formClosingDateInput.value = '';
+        }
+        if(formClosingNotesInput) formClosingNotesInput.value = '';
+        // Hide individual closing divs
+        if(actualPlDiv) actualPlDiv.style.display = 'none';
+        if(closingDateDiv) closingDateDiv.style.display = 'none';
+        if(closingNotesDiv) closingNotesDiv.style.display = 'none';
+
         legsContainer.innerHTML = '';
         legCounter = 0;
         addLeg(0);
@@ -187,19 +253,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (entryDateField) {
             const now = new Date();
             entryDateField.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            if(entryDateField._flatpickr) entryDateField._flatpickr.setDate(entryDateField.value, true);
+            // No need to update flatpickr for entryDate as it's readonly and set directly
         }
      }
 
     // --- Form Submission (Create/Update) ---
-    if (strategyForm) { /* ... (no changes) ... */
+    if (strategyForm) {
         strategyForm.onsubmit = function(event) {
             event.preventDefault();
             let firstValidationError = null;
             const legRows = legsContainer.querySelectorAll('.leg-row');
             if (legRows.length === 0) {
                  firstValidationError = "Debe añadir al menos un leg a la estrategia.";
-            } else {
+            } else { /* ... (leg validation - no change) ... */
                 for (let i = 0; i < legRows.length; i++) {
                     const legRow = legRows[i];
                     const index = i;
@@ -215,17 +281,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             }
+            // Validation for closing fields if status is 'Cerrada' during edit
+            if (editingTradeId && tradeStatusSelect && tradeStatusSelect.value === 'Cerrada') {
+                if (!formActualPlInput || formActualPlInput.value === '' || isNaN(parseFloat(formActualPlInput.value))) {
+                    firstValidationError = firstValidationError || "El P/L Real es obligatorio y debe ser un número si el estado es 'Cerrada'.";
+                }
+                if (!formClosingDateInput || !formClosingDateInput.value) {
+                     firstValidationError = firstValidationError || "La Fecha de Cierre es obligatoria si el estado es 'Cerrada'.";
+                }
+            }
+
             if (firstValidationError) {
                 showPopup('Error de Validación', firstValidationError, 'error');
                 return;
             }
+
             const formData = new FormData(strategyForm);
+            // FormData will pick up 'status', 'actual_pl', 'closing_date_str', 'closing_notes'
+            // from the main form if they are visible and have values.
+            // The backend handles 'None' if fields are empty and status is 'Abierta'.
+
             let url = '/api/save_strategy';
             let method = 'POST';
             if (editingTradeId) {
                 url = `/api/update_strategy/${editingTradeId}`;
                 method = 'PUT';
+                // FormData automatically includes fields from visible inputs.
+                // If status is 'Abierta', actual_pl etc. might be empty. Backend handles this.
             }
+
             fetch(url, { method: method, body: formData })
             .then(response => response.json())
             .then(data => {
@@ -297,75 +381,52 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeImageModalBtnGlobal) closeImageModalBtnGlobal.addEventListener('click', hideImageModal);
     if (imageModalOverlayGlobal) imageModalOverlayGlobal.addEventListener('click', function(event) { if (event.target === imageModalOverlayGlobal) hideImageModal(); });
 
-    // --- Close Trade Modal Logic ---
-    function showCloseTradeModal(tradeId) {
+    // --- Close Trade Modal Logic (for initial closing action) ---
+    function showCloseTradeModal(tradeId) { /* ... (no changes) ... */
         if (!closeTradeModalOverlay || !closeTradeIdField || !closingDateInput || !actualPlInput || !closingNotesInput) {
-            console.error("Elementos del modal de cierre no encontrados.");
-            showPopup("Error", "No se pudo abrir el formulario de cierre.", "error");
-            return;
+            showPopup("Error", "No se pudo abrir el formulario de cierre.", "error"); return;
         }
         closeTradeIdField.value = tradeId;
-        // Set closing date to today by default and initialize/update flatpickr
         const today = new Date().toISOString().slice(0,10);
-        if (closingDateInput._flatpickr) {
-            closingDateInput._flatpickr.setDate(today, true);
-        } else {
-            closingDateInput.value = today;
-            initializeDatepicker(closingDateInput); // Initialize if not already
-        }
+        if (closingDateInput._flatpickr) closingDateInput._flatpickr.setDate(today, true);
+        else closingDateInput.value = today;
         actualPlInput.value = '';
         closingNotesInput.value = '';
         closeTradeModalOverlay.style.display = 'flex';
         setTimeout(() => { closeTradeModalOverlay.classList.add('visible'); }, 20);
     }
-
-    function hideCloseTradeModal() {
+    function hideCloseTradeModal() { /* ... (no changes) ... */
         if (!closeTradeModalOverlay) return;
         closeTradeModalOverlay.classList.remove('visible');
-        setTimeout(() => {
-            if (!closeTradeModalOverlay.classList.contains('visible')) {
-                closeTradeModalOverlay.style.display = 'none';
-            }
-        }, 300);
+        setTimeout(() => { if (!closeTradeModalOverlay.classList.contains('visible')) closeTradeModalOverlay.style.display = 'none'; }, 300);
     }
-
     if (closeCloseTradeModalBtn) closeCloseTradeModalBtn.addEventListener('click', hideCloseTradeModal);
     if (closeTradeModalOverlay) closeTradeModalOverlay.addEventListener('click', function(event) { if (event.target === closeTradeModalOverlay) hideCloseTradeModal(); });
-
-    if (closeTradeForm) {
+    if (closeTradeForm) { /* ... (no changes to its submit handler) ... */
         closeTradeForm.addEventListener('submit', function(event) {
             event.preventDefault();
             const tradeId = closeTradeIdField.value;
             const payload = {
                 actual_pl: actualPlInput.value,
-                closing_date_str: closingDateInput.value, // Flatpickr ensures YYYY-MM-DD
+                closing_date_str: closingDateInput.value,
                 closing_notes: closingNotesInput.value
             };
-
             if (payload.actual_pl === '' || isNaN(parseFloat(payload.actual_pl))) {
-                showPopup("Error de Validación", "Por favor, ingrese un P/L Real válido.", "error");
-                return;
+                showPopup("Error de Validación", "Por favor, ingrese un P/L Real válido.", "error"); return;
             }
-
             fetch(`/api/trade/${tradeId}/close`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     showPopup('¡Éxito!', data.message || 'Operación cerrada correctamente.', 'success');
-                    hideCloseTradeModal();
-                    fetchAndDisplayStrategies();
+                    hideCloseTradeModal(); fetchAndDisplayStrategies();
                 } else {
                     showPopup('Error', data.message || 'No se pudo cerrar la operación.', 'error');
                 }
             })
-            .catch(error => {
-                console.error('Error closing trade:', error);
-                showPopup('Error de Red', 'No se pudo conectar con el servidor.', 'error');
-            });
+            .catch(error => { showPopup('Error de Red', 'No se pudo conectar con el servidor.', 'error'); });
         });
     }
 
@@ -403,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function renderStrategies(strategiesToRender, currentFilterDate = null) { /* ... (modified in previous step to add close button/status) ... */
+    function renderStrategies(strategiesToRender, currentFilterDate = null) {
         savedStrategiesContainer.innerHTML = '';
         if (!strategiesToRender || strategiesToRender.length === 0) {
             savedStrategiesContainer.innerHTML = `<p>No hay estrategias para mostrar${(currentFilterDate && currentFilterDate !== 'Mostrar Todas' ? ` para ${new Date(currentFilterDate + '-01').toLocaleDateString('es-ES',{month:'long', year:'numeric'})}` : '.')}</p>`;
@@ -458,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     `}
                     <div class="card-actions">
                         <button class="view-details-btn">Ver Detalles</button>
-                        ${strategy.status !== 'Cerrada' ? `<button class="edit-strategy-btn" data-trade-id="${strategy.id}">Editar</button>` : ''}
+                        <button class="edit-strategy-btn" data-trade-id="${strategy.id}">Editar</button> {/* Editar siempre visible */}
                         ${strategy.status !== 'Cerrada' ? `<button class="close-trade-btn" data-trade-id="${strategy.id}">Registrar Cierre</button>` : ''}
                         <button class="delete-strategy-btn" data-trade-id="${strategy.id}">Eliminar</button>
                     </div>
@@ -513,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     fetchAndDisplayStrategies();
 
-    if (savedStrategiesContainer) {
+    if (savedStrategiesContainer) { /* ... (modified to include .close-trade-btn listener) ... */
         savedStrategiesContainer.addEventListener('click', function(event) {
             const target = event.target;
             if (target.classList.contains('edit-strategy-btn')) {
@@ -538,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const fullImageUrl = target.getAttribute('data-fullimage-url');
                 if (fullImageUrl) showImageModal(fullImageUrl);
                 else console.error("data-fullimage-url attribute is missing or empty.");
-            } else if (target.classList.contains('close-trade-btn')) {
+            } else if (target.classList.contains('close-trade-btn')) { // Listener for new button
                 const tradeId = target.dataset.tradeId;
                 showCloseTradeModal(tradeId);
             }

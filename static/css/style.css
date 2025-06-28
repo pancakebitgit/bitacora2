@@ -500,6 +500,55 @@ button[type="submit"]:hover, #addLegBtn:hover {
     background-color: #1e7e34;
 }
 
+/* Styles for Closing Details Section in Main Form */
+#closingDetailsSection {
+    margin-top: 25px;
+    margin-bottom: 20px;
+    border: 1px solid #4f545c; /* Slightly lighter border than main form inputs */
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #333336; /* Same as leg-row for differentiation */
+}
+
+#closingDetailsSection legend {
+    color: #00aeff; /* Accent color */
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 0 10px;
+    margin-left: 5px; /* Align with padding of fieldset */
+}
+
+#closingDetailsSection div { /* Wrapper for label + input within fieldset */
+    margin-bottom: 15px;
+}
+
+#closingDetailsSection label {
+    color: #b8c2cc; /* Slightly lighter labels within this section */
+    margin-bottom: 6px;
+}
+
+#closingDetailsSection input[type="number"],
+#closingDetailsSection input[type="date"],
+#closingDetailsSection textarea,
+#closingDetailsSection select {
+    /* Inherits most styles from general input styling */
+    /* Specific adjustments if needed: */
+    background-color: #3c3f41; /* Slightly different bg for inputs in this section */
+    border-color: #525860;
+    font-size: 0.95em; /* Slightly smaller font if desired */
+    padding: 10px 12px;
+}
+
+#closingDetailsSection select {
+    /* Ensure select arrow matches dark theme if browser default is problematic */
+    /* This is often tricky to style universally without custom select replacements */
+    appearance: none; /* Basic reset, may need more for full custom arrow */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23c0c0c0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.6-3.6%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-13z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 10px 10px;
+    padding-right: 30px; /* Make space for arrow */
+}
 .strategy-details {
     margin-top: 15px;
     padding-top: 15px;
