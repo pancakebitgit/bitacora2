@@ -23,6 +23,7 @@
                 <h1>Bitácora de Estrategias de Opciones</h1>
                 <form id="strategyForm">
                     <input type="hidden" id="editingTradeIdField" name="tradeId">
+
                     <h2>Información General de la Operación</h2>
                     <div>
                         <label for="ticker">Activo Subyacente (Ticker):</label>
@@ -36,6 +37,29 @@
                         <label for="marketVision">Visión del Mercado / Justificación:</label>
                         <textarea id="marketVision" name="marketVision" rows="4"></textarea>
                     </div>
+
+                    <fieldset id="closingDetailsSection" style="display: none; margin-top: 20px; border: 1px solid #444; padding: 15px; border-radius: 8px;">
+                        <legend style="color: #00aeff; padding: 0 10px; font-weight: bold;">Detalles de Cierre (si aplica)</legend>
+                        <div>
+                            <label for="trade_status">Estado de la Operación:</label>
+                            <select id="trade_status" name="status" style="width: 100%; padding: 10px; background-color: #36363a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px;">
+                                <option value="Abierta">Abierta</option>
+                                <option value="Cerrada">Cerrada</option>
+                            </select>
+                        </div>
+                        <div id="actualPlDiv" style="display: none;"> <!-- Se mostrará si status es 'Cerrada' -->
+                            <label for="form_actual_pl">P/L Real:</label>
+                            <input type="number" id="form_actual_pl" name="actual_pl" step="any">
+                        </div>
+                        <div id="closingDateDiv" style="display: none;"> <!-- Se mostrará si status es 'Cerrada' -->
+                            <label for="form_closing_date">Fecha de Cierre:</label>
+                            <input type="date" id="form_closing_date" name="closing_date_str">
+                        </div>
+                        <div id="closingNotesDiv" style="display: none;"> <!-- Se mostrará si status es 'Cerrada' -->
+                            <label for="form_closing_notes">Notas de Cierre:</label>
+                            <textarea id="form_closing_notes" name="closing_notes" rows="3"></textarea>
+                        </div>
+                    </fieldset>
 
                     <h2>Constructor de Legs</h2>
                     <div id="legsContainer">

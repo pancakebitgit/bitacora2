@@ -17,8 +17,8 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
     - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones (incluyendo "destellos" para éxito).
     - **Gestión de Operaciones:**
         - **Creación:** Entrada detallada de operaciones multi-leg.
-        - **Edición:** Permite modificar todos los aspectos de una operación guardada (incluyendo legs e imágenes).
-        - **Cierre de Operaciones:** Permite marcar operaciones como "Cerrada", registrando el P/L real, fecha de cierre y notas de cierre. La interfaz se actualiza para reflejar este estado.
+        - **Edición Avanzada:** Permite modificar todos los aspectos de una operación guardada, incluyendo ticker, notas, legs (con recálculo de estrategia/riesgo), añadir imágenes, cambiar el estado de la operación (Abierta/Cerrada) y editar los detalles de cierre (P/L real, fecha, notas de cierre).
+        - **Cierre Rápido de Operaciones:** Un modal dedicado permite marcar rápidamente operaciones como "Cerrada", registrando el P/L real, fecha de cierre y notas de cierre.
         - **Eliminación:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
     - **Visualización de Imágenes Mejorada:** Las imágenes adjuntas se muestran en un modal (pop-up) dentro de la página en lugar de abrir en una nueva pestaña.
     - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con animaciones de carga.
