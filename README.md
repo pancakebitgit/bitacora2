@@ -18,6 +18,7 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
     - **Gestión de Operaciones:**
         - **Creación:** Entrada detallada de operaciones multi-leg.
         - **Edición:** Permite modificar todos los aspectos de una operación guardada (incluyendo legs e imágenes).
+        - **Cierre de Operaciones:** Permite marcar operaciones como "Cerrada", registrando el P/L real, fecha de cierre y notas de cierre. La interfaz se actualiza para reflejar este estado.
         - **Eliminación:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
     - **Visualización de Imágenes Mejorada:** Las imágenes adjuntas se muestran en un modal (pop-up) dentro de la página en lugar de abrir en una nueva pestaña.
     - **Visualización Agrupada:** Muestra las estrategias guardadas, agrupadas por mes de vencimiento, con animaciones de carga.
