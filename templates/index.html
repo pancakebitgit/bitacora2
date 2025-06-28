@@ -44,32 +44,32 @@
                 <div class="leg-row" id="leg-0">
                     <h3>Leg 1</h3>
                     <div>
-                        <label>Acción:</label>
+                        <label>Acción:</label> <!-- No 'for' needed for button group label -->
                         <button type="button" class="action-btn buy" data-action="BUY">COMPRA (Buy to Open)</button>
                         <button type="button" class="action-btn sell" data-action="SELL">VENTA (Sell to Open)</button>
-                        <input type="hidden" name="legs[0][action]" class="leg-action-input" required>
+                        <input type="hidden" id="leg_0_action" name="legs[0][action]" class="leg-action-input" required>
                     </div>
                     <div>
-                        <label for="legs[0][quantity]">Cantidad:</label>
-                        <input type="number" name="legs[0][quantity]" min="1" value="1" required>
+                        <label for="leg_0_quantity">Cantidad:</label>
+                        <input type="number" id="leg_0_quantity" name="legs[0][quantity]" min="1" value="1" required>
                     </div>
                     <div>
-                        <label>Tipo:</label>
+                        <label>Tipo:</label> <!-- No 'for' needed for button group label -->
                         <button type="button" class="option-type-btn call" data-type="CALL">CALL</button>
                         <button type="button" class="option-type-btn put" data-type="PUT">PUT</button>
-                        <input type="hidden" name="legs[0][option_type]" class="leg-option-type-input" required>
+                        <input type="hidden" id="leg_0_option_type" name="legs[0][option_type]" class="leg-option-type-input" required>
                     </div>
                     <div>
-                        <label for="legs[0][expirationDate]">Fecha de Vencimiento:</label>
-                        <input type="date" name="legs[0][expirationDate]" required>
+                        <label for="leg_0_expirationDate">Fecha de Vencimiento:</label>
+                        <input type="date" id="leg_0_expirationDate" name="legs[0][expirationDate]" required>
                     </div>
                     <div>
-                        <label for="legs[0][strike]">Strike:</label>
-                        <input type="number" step="any" name="legs[0][strike]" required>
+                        <label for="leg_0_strike">Strike:</label>
+                        <input type="number" step="any" id="leg_0_strike" name="legs[0][strike]" required>
                     </div>
                     <div>
-                        <label for="legs[0][premium]">Prima (por contrato):</label>
-                        <input type="number" step="any" name="legs[0][premium]" required>
+                        <label for="leg_0_premium">Prima (por contrato):</label>
+                        <input type="number" step="any" id="leg_0_premium" name="legs[0][premium]" required>
                     </div>
                     <button type="button" class="remove-leg-btn" style="display:none;">Eliminar Leg</button>
                 </div>

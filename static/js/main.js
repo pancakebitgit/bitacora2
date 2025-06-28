@@ -99,12 +99,34 @@ document.addEventListener('DOMContentLoaded', function() {
         newLegRow.id = `leg-${currentIndex}`;
         newLegRow.innerHTML = `
             <h3>Leg ${currentIndex + 1}</h3>
-            <div><label>Acción:</label><button type="button" class="action-btn buy" data-action="BUY">COMPRA</button><button type="button" class="action-btn sell" data-action="SELL">VENTA</button><input type="hidden" name="legs[${currentIndex}][action]" class="leg-action-input" required></div>
-            <div><label>Cantidad:</label><input type="number" name="legs[${currentIndex}][quantity]" min="1" value="1" required></div>
-            <div><label>Tipo:</label><button type="button" class="option-type-btn call" data-type="CALL">CALL</button><button type="button" class="option-type-btn put" data-type="PUT">PUT</button><input type="hidden" name="legs[${currentIndex}][option_type]" class="leg-option-type-input" required></div>
-            <div><label>Fecha de Vencimiento:</label><input type="date" name="legs[${currentIndex}][expirationDate]" required></div>
-            <div><label>Strike:</label><input type="number" step="any" name="legs[${currentIndex}][strike]" required></div>
-            <div><label>Prima:</label><input type="number" step="any" name="legs[${currentIndex}][premium]" required></div>
+            <div>
+                <label>Acción:</label> <!-- No 'for' needed as it's for the button group -->
+                <button type="button" class="action-btn buy" data-action="BUY">COMPRA</button>
+                <button type="button" class="action-btn sell" data-action="SELL">VENTA</button>
+                <input type="hidden" id="leg_${currentIndex}_action" name="legs[${currentIndex}][action]" class="leg-action-input" required>
+            </div>
+            <div>
+                <label for="leg_${currentIndex}_quantity">Cantidad:</label>
+                <input type="number" id="leg_${currentIndex}_quantity" name="legs[${currentIndex}][quantity]" min="1" value="1" required>
+            </div>
+            <div>
+                <label>Tipo:</label> <!-- No 'for' needed as it's for the button group -->
+                <button type="button" class="option-type-btn call" data-type="CALL">CALL</button>
+                <button type="button" class="option-type-btn put" data-type="PUT">PUT</button>
+                <input type="hidden" id="leg_${currentIndex}_option_type" name="legs[${currentIndex}][option_type]" class="leg-option-type-input" required>
+            </div>
+            <div>
+                <label for="leg_${currentIndex}_expirationDate">Fecha de Vencimiento:</label>
+                <input type="date" id="leg_${currentIndex}_expirationDate" name="legs[${currentIndex}][expirationDate]" required>
+            </div>
+            <div>
+                <label for="leg_${currentIndex}_strike">Strike:</label>
+                <input type="number" step="any" id="leg_${currentIndex}_strike" name="legs[${currentIndex}][strike]" required>
+            </div>
+            <div>
+                <label for="leg_${currentIndex}_premium">Prima:</label>
+                <input type="number" step="any" id="leg_${currentIndex}_premium" name="legs[${currentIndex}][premium]" required>
+            </div>
             <button type="button" class="remove-leg-btn">Eliminar Leg</button>`;
         legsContainer.appendChild(newLegRow);
         setupButtonToggle(newLegRow);
