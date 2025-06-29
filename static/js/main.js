@@ -355,6 +355,48 @@ document.addEventListener('DOMContentLoaded', function() {
     if (popupModal) popupModal.addEventListener('click', function(event) { if (event.target === popupModal) hidePopup(); });
 
     // --- Image Modal Logic ---
+    // (No changes here, this is just context for where to add the new function)
+
+    // --- Helper Function for P/L Ratio ---
+    function calculatePotentialPlRatio(maxProfit, maxRisk) {
+        // Ensure maxRisk and maxProfit are numbers before division
+        const numMaxRisk = (typeof maxRisk === 'number') ? maxRisk : parseFloat(maxRisk);
+        const numMaxProfit = (typeof maxProfit === 'number') ? maxProfit : parseFloat(maxProfit);
+
+        if (maxRisk === null) { // Risk is unlimited
+            return "N/A (Riesgo Ilimitado)";
+        }
+        if (maxProfit === null) { // Profit is unlimited
+            if (numMaxRisk > 0) {
+                return "Ilimitado";
+            } else { // Unlimited profit with zero or undefined risk is also ill-defined for a simple ratio
+                return "N/A";
+            }
+        }
+
+        // At this point, maxProfit and numMaxProfit should be numbers (not null)
+        // And maxRisk is not null (so numMaxRisk is a number or NaN)
+
+        if (isNaN(numMaxRisk) || isNaN(numMaxProfit)) {
+            return "N/A";
+        }
+
+        if (numMaxRisk > 0) {
+            return (numMaxProfit / numMaxRisk).toFixed(2); // Using 2 decimal places for ratio
+        } else if (numMaxRisk === 0) {
+            if (numMaxProfit > 0) {
+                return "Infinito (Profit > 0, Riesgo 0)";
+            } else if (numMaxProfit === 0) {
+                return "N/A (0/0)";
+            } else { // maxProfit < 0 and maxRisk === 0
+                return "Negativo (Pérdida, Riesgo 0)";
+            }
+        } else { // maxRisk < 0 (should not happen for "risk") or other cases
+            return "N/A";
+        }
+    }
+
+
     function showImageModal(imageUrl) { /* ... (no changes) ... */
         const imageModalOverlay = document.getElementById('imageModalOverlay');
         const fullImageDisplay = document.getElementById('fullImageDisplay');
@@ -516,6 +558,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ` : `
                         <p><strong>Riesgo Máx:</strong> ${maxRiskDisplay}</p>
                         <p><strong>Beneficio Máx:</strong> ${maxProfitDisplay}</p>
+                        <p><strong>Ratio P/L Potencial:</strong> ${calculatePotentialPlRatio(strategy.max_profit, strategy.max_risk)}</p>
                     `}
                     <div class="card-actions">
                         <button class="view-details-btn">Ver Detalles</button>
