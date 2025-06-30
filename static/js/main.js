@@ -224,8 +224,43 @@ document.addEventListener('DOMContentLoaded', function() {
             }).catch(error => { showPopup('Error de Red', 'No se pudo conectar.', 'error'); });
         });
     }
-    const OPTION_MULTIPLIER_JS = 100.0; // Ya estaba definido arriba, asegurar una sola definición
-    const chartInstances = {}; // Ya estaba definido arriba
+    const OPTION_MULTIPLIER_JS = 100.0;
+    const chartInstances = {};
+
+    // --- Helper Function for P/L Ratio ---
+    function calculatePotentialPlRatio(maxProfit, maxRisk) {
+        const numMaxRisk = (typeof maxRisk === 'number') ? maxRisk : parseFloat(maxRisk);
+        const numMaxProfit = (typeof maxProfit === 'number') ? maxProfit : parseFloat(maxProfit);
+
+        if (maxRisk === null) {
+            return "N/A (Riesgo Ilimitado)";
+        }
+        if (maxProfit === null) {
+            if (numMaxRisk > 0) {
+                return "Ilimitado";
+            } else {
+                return "N/A";
+            }
+        }
+
+        if (isNaN(numMaxRisk) || isNaN(numMaxProfit)) {
+            return "N/A";
+        }
+
+        if (numMaxRisk > 0) {
+            return (numMaxProfit / numMaxRisk).toFixed(2);
+        } else if (numMaxRisk === 0) {
+            if (numMaxProfit > 0) {
+                return "Infinito (Profit > 0, Riesgo 0)";
+            } else if (numMaxProfit === 0) {
+                return "N/A (0/0)";
+            } else {
+                return "Negativo (Pérdida, Riesgo 0)";
+            }
+        } else {
+            return "N/A";
+        }
+    }
 
     // --- Form Population for Edit & Reset (MODIFIED) ---
     function populateFormForEdit(tradeId) {
