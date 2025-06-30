@@ -16,8 +16,8 @@ Esta aplicación web permite registrar operaciones de opciones, las clasifica po
     - **Calendario Personalizado:** Selector de fecha de vencimiento mejorado y temático (Flatpickr).
     - **Notificaciones Pop-up Interactivas:** Confirmaciones de guardado y errores con animaciones (incluyendo "destellos" para éxito).
     - **Gestión de Operaciones:**
-        - **Creación:** Entrada detallada de operaciones multi-leg.
-        - **Edición Avanzada:** Permite modificar todos los aspectos de una operación guardada, incluyendo ticker, notas, legs (con recálculo de estrategia/riesgo), añadir imágenes, cambiar el estado de la operación (Abierta/Cerrada) y editar los detalles de cierre (P/L real, fecha, notas de cierre).
+        - **Creación Detallada:** Entrada de operaciones multi-leg con información general, y **criterios de entrada predefinidos (etiquetas como Darkpool, Walls, UOA)**.
+        - **Edición Avanzada:** Permite modificar todos los aspectos de una operación guardada, incluyendo ticker, notas, legs (con recálculo de estrategia/riesgo), añadir imágenes, cambiar el estado de la operación (Abierta/Cerrada), editar los detalles de cierre (P/L real, fecha, notas de cierre) y modificar los criterios de entrada.
         - **Cierre Rápido de Operaciones:** Un modal dedicado permite marcar rápidamente operaciones como "Cerrada", registrando el P/L real, fecha de cierre y notas de cierre.
         - **Eliminación:** Permite eliminar registros de estrategias con confirmación (incluyendo la eliminación de imágenes asociadas del servidor).
     - **Visualización de Imágenes Mejorada:** Las imágenes adjuntas se muestran en un modal (pop-up) dentro de la página en lugar de abrir en una nueva pestaña.

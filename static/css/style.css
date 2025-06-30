@@ -500,6 +500,62 @@ button[type="submit"]:hover, #addLegBtn:hover {
     background-color: #1e7e34;
 }
 
+/* Styles for Criteria/Tags Checkboxes in Form */
+.form-section-criterios {
+    margin-top: 20px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #333336; /* Similar to leg-row or fieldset */
+    border-radius: 8px;
+    border: 1px solid #4f545c;
+}
+.form-section-criterios > label { /* The main label for the section */
+    font-weight: bold;
+    color: #00aeff; /* Accent color */
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+
+.checkbox-group {
+    display: flex; /* Align checkbox and label nicely */
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+input.custom-checkbox { /* Basic styling, advanced styling is complex */
+    width: auto; /* Override general input width */
+    margin-right: 10px;
+    transform: scale(1.2); /* Slightly larger checkbox */
+    accent-color: #007acc; /* Modern way to color checkbox tick for some browsers */
+    /* For older browsers, custom checkbox styling is much more involved */
+    box-shadow: none; /* Remove general input box-shadow */
+    padding:0; margin-bottom: 0; /* Reset some inherited styles */
+}
+input.custom-checkbox:focus {
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.4); /* Custom focus for checkbox */
+}
+
+
+label.checkbox-label {
+    color: #c0c0c0;
+    font-weight: normal;
+    cursor: pointer;
+    margin-bottom: 0; /* Reset default label margin */
+    flex-grow: 1; /* Allow label to take space */
+}
+
+/* Styles for Tag Badges in Strategy Cards */
+.tag-badge {
+    display: inline-block;
+    background-color: #007acc; /* Accent color */
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px; /* Pill shape */
+    font-size: 0.8em;
+    margin-right: 5px;
+    margin-bottom: 5px; /* For wrapping */
+    font-weight: 500;
+}
 /* Styles for P/L Chart Container */
 .pnl-chart-container {
     position: relative; /* Good for Chart.js responsiveness and potential tooltips/plugins */

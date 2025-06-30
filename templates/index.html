@@ -38,6 +38,23 @@
                         <textarea id="marketVision" name="marketVision" rows="4"></textarea>
                     </div>
 
+                    <div class="form-section-criterios" style="margin-top: 15px; margin-bottom: 15px;">
+                        <label style="display:block; margin-bottom:10px; font-weight: 500; color: #b0b0b0;">Criterios de Entrada (Seleccione los que apliquen):</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="tag_darkpool" name="tag_options" value="Darkpool" class="custom-checkbox">
+                            <label for="tag_darkpool" class="checkbox-label">Darkpool</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="tag_walls" name="tag_options" value="Walls" class="custom-checkbox">
+                            <label for="tag_walls" class="checkbox-label">Walls</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="tag_uoa" name="tag_options" value="UOA" class="custom-checkbox">
+                            <label for="tag_uoa" class="checkbox-label">Unusual Option Activity (UOA)</label>
+                        </div>
+                        <input type="hidden" id="trade_tags_hidden" name="tags">
+                    </div>
+
                     <fieldset id="closingDetailsSection" style="display: none; margin-top: 20px; border: 1px solid #444; padding: 15px; border-radius: 8px;">
                         <legend style="color: #00aeff; padding: 0 10px; font-weight: bold;">Detalles de Cierre (si aplica)</legend>
                         <div>
