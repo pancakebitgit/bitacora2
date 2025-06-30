@@ -63,6 +63,7 @@ class Trade(db.Model):
     closing_date = db.Column(db.DateTime, nullable=True)
     actual_pl = db.Column(db.Float, nullable=True)
     closing_notes = db.Column(db.Text, nullable=True)
+    tags = db.Column(db.String(250), nullable=True) # Nuevo campo para etiquetas
 
     def to_dict(self):
         primary_exp_str = None
@@ -86,7 +87,8 @@ class Trade(db.Model):
             'status': self.status,
             'closing_date': self.closing_date.isoformat() if self.closing_date else None,
             'actual_pl': self.actual_pl,
-            'closing_notes': self.closing_notes
+            'closing_notes': self.closing_notes,
+            'tags': self.tags # Añadir tags a la serialización
         }
 
     def __repr__(self):
@@ -291,7 +293,8 @@ def save_strategy():
                 notes=market_vision,
                 detected_strategy=detected_strategy_name,
                 max_risk=max_risk,
-                max_profit=max_profit
+                max_profit=max_profit,
+                tags=data.get('tags') # Nuevo campo tags
             )
             db.session.add(new_trade)
             # We need to flush to get new_trade.id for foreign keys if not using cascades properly before commit
@@ -445,8 +448,11 @@ def update_strategy(trade_id):
                     trade_to_update.closing_date = datetime.strptime(data.get('closing_date_str'), '%Y-%m-%d').date()
                 except ValueError:
                     return jsonify(success=False, message="Formato de fecha de cierre inválido. Usar YYYY-MM-DD."), 400
-            if data.get('closing_notes') is not None:
+            if data.get('closing_notes') is not None: # Allow empty string for notes
                  trade_to_update.closing_notes = data.get('closing_notes')
+
+        # Actualizar tags
+        trade_to_update.tags = data.get('tags', trade_to_update.tags) # Usar valor existente si no se provee
 
 
         # Manejo de Legs: Eliminar los antiguos y crear nuevos
