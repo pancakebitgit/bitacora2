@@ -420,12 +420,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // --- Displaying Saved Strategies & Sidebar ---
-    function populateExpirationNav(strategies) { /* ... (as before) ... */
-        if (!expirationNav) return;
-        expirationNav.innerHTML = '';
-        const expirationDates = [...new Set(strategies.map(s => s.primary_expiration_date_str ? s.primary_expiration_date_str.substring(0, 7) : 'Sin Vencimiento'))];
-        expirationDates.sort((a, b) => {
-            if (a === 'Sin Vencimiento') return 1; if (b === 'Sin Vencimiento') return -1;
+    function populateExpirationNav(strategies) {
+        try {
+            if (!expirationNav) {
+                console.warn("Elemento expirationNav no encontrado al poblar.");
+                return;
+            }
+            expirationNav.innerHTML = '';
+            const expirationDates = [...new Set(strategies.map(s => s.primary_expiration_date_str ? s.primary_expiration_date_str.substring(0, 7) : 'Sin Vencimiento'))];
+            expirationDates.sort((a, b) => {
+                if (a === 'Sin Vencimiento') return 1;
+                if (b === 'Sin Vencimiento') return -1;
             return new Date(a + '-01') - new Date(b + '-01');
         });
         const allLink = document.createElement('a');
@@ -451,12 +456,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             expirationNav.appendChild(link);
         });
+    } catch (error) {
+        console.error("Error en populateExpirationNav:", error);
+        showPopup("Error de Interfaz", "Ocurrió un error al generar la navegación de fechas.", "error");
     }
+}
 
-    function renderStrategies(strategiesToRender, currentFilterDate = null) { /* ... (as before, with chart canvas) ... */
-        savedStrategiesContainer.innerHTML = '';
-        if (!strategiesToRender || strategiesToRender.length === 0) {
-            savedStrategiesContainer.innerHTML = `<p>No hay estrategias para mostrar${(currentFilterDate && currentFilterDate !== 'Mostrar Todas' ? ` para ${new Date(currentFilterDate + '-01').toLocaleDateString('es-ES',{month:'long', year:'numeric'})}` : '.')}</p>`;
+    function renderStrategies(strategiesToRender, currentFilterDate = null) {
+        try {
+            if (!savedStrategiesContainer) {
+                console.warn("Elemento savedStrategiesContainer no encontrado al renderizar.");
+                return;
+            }
+            savedStrategiesContainer.innerHTML = '';
+            if (!strategiesToRender || strategiesToRender.length === 0) {
+                savedStrategiesContainer.innerHTML = `<p>No hay estrategias para mostrar${(currentFilterDate && currentFilterDate !== 'Mostrar Todas' ? ` para ${new Date(currentFilterDate + '-01').toLocaleDateString('es-ES',{month:'long', year:'numeric'})}` : '.')}</p>`;
             return;
         }
         const groupedByMonth = strategiesToRender.reduce((acc, strategy) => {
@@ -549,7 +563,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (groupedByMonth[monthYear].length > 0) savedStrategiesContainer.appendChild(monthDiv);
         });
+    } catch (error) {
+        console.error("Error en renderStrategies:", error);
+        if(savedStrategiesContainer) savedStrategiesContainer.innerHTML = "<p>Ocurrió un error al mostrar las estrategias. Revise la consola para más detalles.</p>";
+        showPopup("Error de Interfaz", "Ocurrió un error al mostrar las estrategias.", "error");
     }
+}
 
     function fetchAndDisplayStrategies() {
         fetch('/api/get_strategies')
