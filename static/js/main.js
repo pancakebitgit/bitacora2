@@ -44,6 +44,130 @@ document.addEventListener('DOMContentLoaded', function() {
     const OPTION_MULTIPLIER_JS = 100.0;
     const chartInstances = {}; // To store and manage chart instances
 
+    // --- Generic P/L Chart Data Generation ---
+    function getGenericStrategyPayoffData(legs, priceRangePoints = 100) {
+        if (!legs || legs.length === 0) {
+            console.error("No legs provided for payoff calculation.");
+            return null;
+        }
+
+        let primaNetaTotalEfectiva = 0;
+        const strikes = [];
+        legs.forEach(leg => {
+            const premium = parseFloat(leg.premium);
+            const quantity = parseInt(leg.quantity, 10);
+            const strike = parseFloat(leg.strike);
+
+            if (!isNaN(strike)) {
+                strikes.push(strike);
+            }
+
+            if (leg.action === 'BUY') {
+                primaNetaTotalEfectiva -= premium * quantity * OPTION_MULTIPLIER_JS;
+            } else if (leg.action === 'SELL') {
+                primaNetaTotalEfectiva += premium * quantity * OPTION_MULTIPLIER_JS;
+            }
+        });
+
+        const uniqueStrikes = [...new Set(strikes)].sort((a, b) => a - b);
+        let minStrike = uniqueStrikes.length > 0 ? uniqueStrikes[0] : 100; // Default if no strikes (e.g. stock only)
+        let maxStrike = uniqueStrikes.length > 0 ? uniqueStrikes[uniqueStrikes.length - 1] : minStrike + 10;
+
+        if (uniqueStrikes.length === 1) { // e.g. Long Call/Put, Straddle, Strangle (if same strike for strangle)
+            const singleK = uniqueStrikes[0];
+            // For single strike, define range more broadly based on typical option behavior or a fixed %
+            // A common way is to find breakeven and extend beyond it.
+            // Simple % extension for now:
+            minStrike = singleK * 0.70; // 30% below
+            maxStrike = singleK * 1.30; // 30% above
+        } else if (uniqueStrikes.length > 1) {
+            const rangeFactor = 0.20; // 20% beyond min/max strikes
+            minStrike = minStrike * (1 - rangeFactor);
+            maxStrike = maxStrike * (1 + rangeFactor);
+        } else { // No strikes found, fallback for safety, though legs should have strikes
+             minStrike = 50; maxStrike = 150;
+        }
+        minStrike = Math.max(0.1, minStrike); // Ensure minPrice is not zero or negative
+
+
+        const labels = []; // X-axis: Underlying prices
+        const data = [];   // Y-axis: P/L values
+
+        // Ensure strikes themselves are evaluation points for precision at kinks
+        const evaluationPoints = [...new Set([...uniqueStrikes, minStrike, maxStrike])].sort((a,b) => a-b);
+
+        // Generate additional points for smoother curve if needed, or just use evaluationPoints + some in between
+        let tempLabels = [...evaluationPoints];
+        if (priceRangePoints > evaluationPoints.length) {
+            const numAdditionalPoints = priceRangePoints - evaluationPoints.length;
+            if (evaluationPoints.length >=2) { // Need at least 2 points to make segments
+                for (let i = 0; i < evaluationPoints.length - 1; i++) {
+                    const start = evaluationPoints[i];
+                    const end = evaluationPoints[i+1];
+                    // Distribute additional points somewhat proportionally to segment length
+                    const segmentLength = end - start;
+                    const overallRange = maxStrike - minStrike;
+                    const pointsInSegment = Math.max(1, Math.round( (segmentLength / overallRange) * numAdditionalPoints / (evaluationPoints.length -1) ) );
+
+                    const stepInSegment = (end - start) / (pointsInSegment +1) ; // +1 because we add points between start and end
+                    for (let j = 1; j <= pointsInSegment; j++) {
+                        tempLabels.push(start + j * stepInSegment);
+                    }
+                }
+            } else if (evaluationPoints.length === 1 && numAdditionalPoints > 0) { // Only one strike, or min=max
+                 const K = evaluationPoints[0];
+                 const step = (K * 0.4) / numAdditionalPoints; // 20% on each side
+                 for(let i=1; i<= numAdditionalPoints/2; i++) tempLabels.push(K - i*step);
+                 for(let i=1; i<= numAdditionalPoints/2; i++) tempLabels.push(K + i*step);
+            }
+        }
+        // Sort all points and remove duplicates
+        const finalLabelsUnsorted = [...new Set(tempLabels)];
+        const finalLabelsSorted = finalLabelsUnsorted.sort((a,b) => a-b).filter(p => p >= minStrike && p <=maxStrike);
+        // If still not enough points (e.g. minStrike=maxStrike), add some default range
+        if (finalLabelsSorted.length < 5 && uniqueStrikes.length > 0) {
+            const K = uniqueStrikes[0];
+            finalLabelsSorted.length = 0; // Clear
+            for(let i=0; i<priceRangePoints; i++) {
+                const price = (K * 0.7) + i * ( (K*1.3 - K*0.7) / (priceRangePoints -1) );
+                finalLabelsSorted.push(price);
+            }
+        } else if (finalLabelsSorted.length < 2) { // Absolute fallback
+            finalLabelsSorted.push(minStrike * 0.9, maxStrike * 1.1);
+        }
+
+
+        finalLabelsSorted.forEach(S_price => {
+            labels.push(S_price.toFixed(2));
+            let payoffBrutoTotalEnS = 0;
+            legs.forEach(leg => {
+                const K_leg = parseFloat(leg.strike);
+                const Q_leg = parseInt(leg.quantity, 10);
+                let payoffLeg = 0;
+
+                if (leg.option_type === 'CALL') {
+                    payoffLeg = Math.max(0, S_price - K_leg) * Q_leg * OPTION_MULTIPLIER_JS;
+                } else if (leg.option_type === 'PUT') {
+                    payoffLeg = Math.max(0, K_leg - S_price) * Q_leg * OPTION_MULTIPLIER_JS;
+                }
+
+                if (leg.action === 'SELL') {
+                    payoffLeg *= -1;
+                }
+                payoffBrutoTotalEnS += payoffLeg;
+            });
+            const PL_NetoEnS = payoffBrutoTotalEnS + primaNetaTotalEfectiva;
+            data.push(PL_NetoEnS.toFixed(2));
+        });
+
+        return {
+            labels: labels,
+            data: data,
+            strikes: uniqueStrikes.map(s => s.toFixed(2)),
+            primaNetaTotalEfectiva: primaNetaTotalEfectiva.toFixed(2)
+        };
+    }
+
 
     // --- Initialization ---
     if (entryDateField) {
@@ -383,33 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- P/L Chart Logic ---
-    function getLongCallPayoffData(leg, priceRangePoints = 30) { // Reduced points for less dense graph
-        if (!leg || leg.option_type !== 'CALL' || leg.action !== 'BUY') return null;
-        const K = parseFloat(leg.strike);
-        const premiumCostPerShare = parseFloat(leg.premium); // This is cost per share for one contract's worth of shares
-        const quantity = parseInt(leg.quantity, 10);
-        const totalPremiumPaid = premiumCostPerShare * quantity * OPTION_MULTIPLIER_JS;
-        const maxLoss = -totalPremiumPaid;
-        const breakeven = K + premiumCostPerShare;
-
-        let minPrice = K * 0.8;
-        let maxPrice = K * 1.2;
-        if (breakeven > K) maxPrice = Math.max(maxPrice, breakeven * 1.1);
-        else minPrice = Math.min(minPrice, breakeven * 0.9);
-        minPrice = Math.max(0, minPrice); // Ensure price doesn't go below 0
-
-        const labels = []; const data = [];
-        const step = (maxPrice - minPrice) / (priceRangePoints - 1);
-        for (let i = 0; i < priceRangePoints; i++) {
-            const S = minPrice + (i * step);
-            labels.push(S.toFixed(2));
-            let pl;
-            if (S <= K) pl = maxLoss;
-            else pl = ((S - K) * quantity * OPTION_MULTIPLIER_JS) - totalPremiumPaid;
-            data.push(pl.toFixed(2));
-        }
-        return { labels, data, breakeven: breakeven.toFixed(2), maxLoss: maxLoss.toFixed(2), strike: K.toFixed(2) };
-    }
+    // getLongCallPayoffData function has been removed as it's replaced by getGenericStrategyPayoffData
 
     function displayPnlChart(canvasId, chartPayload, strategyName, ticker) {
         const canvas = document.getElementById(canvasId);
@@ -417,7 +515,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = canvas.getContext('2d');
         if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
 
-        const { labels, data, breakeven, maxLoss, strike } = chartPayload;
+        const { labels, data, strikes, primaNetaTotalEfectiva } = chartPayload; // Updated destructuring
+        // console.log("Chart display with Prima Neta:", primaNetaTotalEfectiva, "Strikes:", strikes); // Optional debug
+
         const yValues = data.map(val => parseFloat(val));
         let yMin = Math.min(...yValues);
         let yMax = Math.max(...yValues);
@@ -582,15 +682,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (detailsDiv) {
                             detailsDiv.classList.toggle('expanded');
                             this.textContent = detailsDiv.classList.contains('expanded') ? 'Ocultar Detalles' : 'Ver Detalles';
-                            if (detailsDiv.classList.contains('expanded') && currentStrategy) {
-                                // Generate and display chart only when expanded and strategy is found
-                                if (currentStrategy.detected_strategy === "Long Call" && currentStrategy.legs.length === 1) {
-                                    const chartData = getLongCallPayoffData(currentStrategy.legs[0]);
-                                    if (chartData) {
-                                        displayPnlChart(`pnlChartCanvas_${currentStrategy.id}`, chartData, currentStrategy.detected_strategy, currentStrategy.ticker);
+                            if (detailsDiv.classList.contains('expanded') && currentStrategy && currentStrategy.legs && currentStrategy.legs.length > 0) {
+                                // Siempre intentar generar gráfico con la función genérica si hay legs
+                                const chartData = getGenericStrategyPayoffData(currentStrategy.legs);
+                                if (chartData) {
+                                    displayPnlChart(`pnlChartCanvas_${currentStrategy.id}`, chartData, currentStrategy.detected_strategy, currentStrategy.ticker);
+                                } else {
+                                    // Opcional: limpiar el canvas o mostrar mensaje si no se pudieron generar datos
+                                    const canvas = document.getElementById(`pnlChartCanvas_${currentStrategy.id}`);
+                                    if (canvas) {
+                                        const ctx = canvas.getContext('2d');
+                                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                        // Podrías dibujar un texto como "No se pudo generar el gráfico"
                                     }
+                                    console.warn("No se pudieron generar datos del gráfico para:", currentStrategy);
                                 }
-                                // TODO: Add else if for other strategy types here
+                            } else if (!detailsDiv.classList.contains('expanded') && chartInstances[`pnlChartCanvas_${currentStrategy.id}`]) {
+                                // Destruir el gráfico si los detalles se colapsan
+                                chartInstances[`pnlChartCanvas_${currentStrategy.id}`].destroy();
+                                delete chartInstances[`pnlChartCanvas_${currentStrategy.id}`];
                             }
                         }
                     });
