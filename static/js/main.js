@@ -312,6 +312,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeImageModalBtnGlobalRef) closeImageModalBtnGlobalRef.addEventListener('click', hideImageModal);
     if (imageModalOverlayGlobalRef) imageModalOverlayGlobalRef.addEventListener('click', function(event) { if (event.target === imageModalOverlayGlobalRef) hideImageModal(); });
 
+    // --- Helper Function for P/L Ratio ---
+    function calculatePotentialPlRatio(maxProfit, maxRisk) {
+        const numMaxRisk = (typeof maxRisk === 'number') ? maxRisk : parseFloat(maxRisk);
+        const numMaxProfit = (typeof maxProfit === 'number') ? maxProfit : parseFloat(maxProfit);
+
+        if (maxRisk === null) {
+            return "N/A (Riesgo Ilimitado)";
+        }
+        if (maxProfit === null) {
+            if (numMaxRisk > 0) {
+                return "Ilimitado";
+            } else {
+                return "N/A";
+            }
+        }
+
+        if (isNaN(numMaxRisk) || isNaN(numMaxProfit)) {
+            return "N/A";
+        }
+
+        if (numMaxRisk > 0) {
+            return (numMaxProfit / numMaxRisk).toFixed(2);
+        } else if (numMaxRisk === 0) {
+            if (numMaxProfit > 0) {
+                return "Infinito (Profit > 0, Riesgo 0)";
+            } else if (numMaxProfit === 0) {
+                return "N/A (0/0)";
+            } else {
+                return "Negativo (Pérdida, Riesgo 0)";
+            }
+        } else {
+            return "N/A";
+        }
+    }
+
     // --- Close Trade Modal Logic ---
     function showCloseTradeModal(tradeId) { /* ... (as before) ... */
         if (!closeTradeModalOverlay || !closeTradeIdField || !closingDateInput || !actualPlInput || !closingNotesInput) {
