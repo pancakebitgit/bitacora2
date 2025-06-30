@@ -157,10 +157,20 @@ def index():
 def get_strategies():
     try:
         trades = Trade.query.order_by(Trade.entry_date.desc()).all()
-        return jsonify(success=True, strategies=[trade.to_dict() for trade in trades])
-    except Exception as e:
-        print(f"Error fetching strategies: {e}")
-        return jsonify(success=False, message=f"Error fetching strategies: {str(e)}"), 500
+        strategies_data = []
+        for trade in trades:
+            try:
+                strategies_data.append(trade.to_dict())
+            except Exception as e_serialize:
+                print(f"Error serializing trade ID {trade.id}: {e_serialize}")
+                # Decide si continuar o fallar todo. Por ahora, omitimos el trade problemático.
+                # Alternativamente, podrías añadir un placeholder o un mensaje de error para ese trade.
+        return jsonify(success=True, strategies=strategies_data)
+    except Exception as e_query:
+        print(f"CRITICAL Error fetching or processing strategies: {e_query}")
+        import traceback
+        traceback.print_exc() # Print full traceback to Flask console
+        return jsonify(success=False, message=f"Error crítico al obtener estrategias: {str(e_query)}"), 500
 
 @app.route('/api/hello') # Keep a distinct API endpoint if needed
 def hello_api():
