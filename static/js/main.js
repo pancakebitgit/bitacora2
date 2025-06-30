@@ -551,10 +551,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function fetchAndDisplayStrategies() { /* ... (as before) ... */
+    function fetchAndDisplayStrategies() {
         fetch('/api/get_strategies')
-            .then(response => response.json())
+            .then(response => {
+                console.log("Respuesta cruda del servidor (status):", response.status, response.statusText); // Log status
+                // Clonar la respuesta para poder leerla dos veces (como texto y como json)
+                const clonedResponse = response.clone();
+                clonedResponse.text().then(text => {
+                    console.log("Respuesta cruda del servidor (texto):", text); // Log como texto
+                });
+                if (!response.ok) {
+                    throw new Error(`Error de red o servidor: ${response.status} ${response.statusText}`);
+                }
+                return response.json(); // Intentar parsear como JSON
+            })
             .then(data => {
+                console.log("Datos JSON parseados recibidos del servidor:", data); // Log de datos parseados
                 if (data.success) {
                     allFetchedStrategies = data.strategies;
                     populateExpirationNav(allFetchedStrategies);
